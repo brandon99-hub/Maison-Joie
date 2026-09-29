@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
-import { ChevronLeft, ChevronRight, ShoppingCart } from "lucide-react"
+import { ChevronLeft, ChevronRight, ShoppingCart, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useCart } from "@/providers"
 import { toast } from "sonner"
@@ -21,13 +21,6 @@ interface BundleCarouselProps {
         product_ids?: number[]
     }>
 }
-
-const DEFAULT_BUNDLE_IMAGES = [
-    "/cute summer fridays lip gloss key chain charm….jpg",
-    "/i love the new charms.jpg",
-    "/Keep your lippie with you wherever you go by….jpg",
-    "/my pic.jpg", // Fixed: removed emoji from filename
-]
 
 export function BundleCarousel({ bundles }: BundleCarouselProps) {
     const [currentIndex, setCurrentIndex] = useState(0)
@@ -46,7 +39,7 @@ export function BundleCarousel({ bundles }: BundleCarouselProps) {
     if (bundles.length === 0) return null
 
     const currentBundle = bundles[currentIndex]
-    const bundleImage = currentBundle.bundle_image || DEFAULT_BUNDLE_IMAGES[currentIndex % DEFAULT_BUNDLE_IMAGES.length]
+    const bundleImage = currentBundle.bundle_image
 
     const goToPrevious = () => {
         setCurrentIndex((prev) => (prev - 1 + bundles.length) % bundles.length)
@@ -80,7 +73,7 @@ export function BundleCarousel({ bundles }: BundleCarouselProps) {
                     product_id: product.id,
                     name: product.name,
                     price: discountedPricePerProduct, // Use bundle price divided by number of products
-                    image: bundle.bundle_image || bundleImage,
+                    image: bundle.bundle_image || "",
                     quantity: 1,
                 })
             })
@@ -122,13 +115,19 @@ export function BundleCarousel({ bundles }: BundleCarouselProps) {
                         }}
                         className="absolute inset-0"
                     >
-                        <Image
-                            src={bundleImage}
-                            alt={currentBundle.name}
-                            fill
-                            className="object-cover"
-                            priority={currentIndex === 0}
-                        />
+                        {bundleImage ? (
+                            <Image
+                                src={bundleImage}
+                                alt={currentBundle.name}
+                                fill
+                                className="object-cover"
+                                priority={currentIndex === 0}
+                            />
+                        ) : (
+                            <div className="absolute inset-0 bg-gradient-to-br from-rose-400 to-pink-400 flex items-center justify-center">
+                                <Sparkles className="h-16 w-16 text-white/60" />
+                            </div>
+                        )}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
                         {/* Bundle Info Overlay */}

@@ -56,7 +56,7 @@ export function PWAInstallPrompt() {
             </button>
 
             <div className="pr-6">
-                <h3 className="font-semibold mb-1">Install GlossyClipsKE</h3>
+                <h3 className="font-semibold mb-1">Install Maison Joie</h3>
                 <p className="text-sm text-muted-foreground mb-4">
                     Add to your home screen for quick access and offline browsing
                 </p>

@@ -6,8 +6,7 @@ import { motion } from "framer-motion"
 import { ArrowRight, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { RotatingCategoryButton } from "@/components/rotating-category-button"
-
-const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_MPESA_PHONE_NUMBER || "254741991213"
+import { WHATSAPP_NUMBER } from "@/lib/whatsapp"
 
 export function HeroSection() {
 
@@ -32,11 +31,11 @@ export function HeroSection() {
       <div className="container mx-auto px-4 sm:px-6 text-center">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           <Image
-            src="/logo.jpeg"
-            alt="GLOSSYCLIPSKE"
-            width={100}
-            height={100}
-            className="mx-auto mb-4 sm:mb-6 rounded-full shadow-lg ring-4 ring-rose-100/50 w-[100px] h-[100px] sm:w-[120px] sm:h-[120px]"
+            src="/logo2.png"
+            alt="Maison Joie"
+            width={316}
+            height={66}
+            className="mx-auto mb-4 sm:mb-6 h-14 sm:h-16 w-auto object-contain"
             priority
             loading="eager"
           />
@@ -58,7 +57,7 @@ export function HeroSection() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="text-3xl sm:text-4xl md:text-6xl font-black mb-4 sm:mb-6 text-balance leading-tight px-2"
         >
-          Hair Clips & Lip Gloss
+          Fragrances
           <br />
           <span className="bg-gradient-to-r from-rose-500 to-pink-500 bg-clip-text text-transparent">
             that hit different
@@ -71,7 +70,7 @@ export function HeroSection() {
           transition={{ duration: 0.5, delay: 0.3 }}
           className="text-muted-foreground text-base sm:text-lg md:text-xl mb-6 sm:mb-8 max-w-md mx-auto text-pretty px-4"
         >
-          Stay glossy. Stay cute. Always. 💕
+          Stay iconic. Stay unforgettable. 💕
         </motion.p>
 
         <motion.div
@@ -100,16 +99,7 @@ export function HeroSection() {
           transition={{ duration: 0.5, delay: 0.5 }}
           className="mt-6 sm:mt-8 text-xs sm:text-sm text-muted-foreground px-4"
         >
-          DM us on Instagram{" "}
-          <a
-            href="https://instagram.com/_glossyclipke_"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-rose-500 hover:underline font-medium"
-          >
-            @_glossyclipke_
-          </a>{" "}
-          or WhatsApp{" "}
+          WhatsApp us at{" "}
           <a
             href={`https://wa.me/${WHATSAPP_NUMBER}`}
             target="_blank"

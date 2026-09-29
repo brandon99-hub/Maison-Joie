@@ -57,6 +57,7 @@ import {
 import { useCart } from "@/providers"
 import type { PickupMtaaniLocation, CustomerAddress } from "@/lib/db"
 import { getCustomerAddresses, getCustomerProfile } from "@/app/dashboard/actions"
+import { WHATSAPP_NUMBER } from "@/lib/whatsapp"
 import { useSession } from "next-auth/react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
@@ -363,7 +364,7 @@ function CartContent() {
         }
 
         const message =
-          `Hi GlossyClipsKE! 👋
+          `Hi Maison Joie! 👋
  
  I've just placed an order:
  📦 REFERENCE: ${result.referenceCode}
@@ -378,8 +379,7 @@ function CartContent() {
  Please confirm my exact total with delivery fees so I can pay! 🙏`;
 
         // 2. Open WhatsApp immediately
-        const MPESA_PHONE = process.env.NEXT_PUBLIC_MPESA_PHONE_NUMBER || "0742111111"
-        window.open(`https://wa.me/${MPESA_PHONE}?text=${encodeURIComponent(message)}`, "_blank")
+        window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, "_blank")
 
         // 3. Clear cart and redirect
         clearCart()

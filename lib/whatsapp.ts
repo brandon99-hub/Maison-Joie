@@ -1,4 +1,6 @@
 // WhatsApp notification helper
+export const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER!
+
 export function notifyOwnerNewOrder(order: {
     referenceCode: string
     customerName: string
@@ -7,7 +9,7 @@ export function notifyOwnerNewOrder(order: {
     deliveryMethod?: string
     pickupLocation: string
 }) {
-    const ownerPhone = process.env.NEXT_PUBLIC_MPESA_PHONE_NUMBER || "254741991213"
+    const ownerPhone = WHATSAPP_NUMBER
 
     const deliveryMethodLabel = order.deliveryMethod === "pickup-mtaani"
         ? "Pickup Mtaani"

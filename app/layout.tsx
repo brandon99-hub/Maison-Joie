@@ -25,28 +25,28 @@ const dancing = Dancing_Script({
 })
 
 export const metadata: Metadata = {
-  title: "GLOSSYCLIPSKE | Hair Clips & Lip Gloss",
+  title: "MAISON JOIE | Perfume with Elegance",
   description:
-    "Premium hair clips and lip gloss for the glow-up generation. Shop now and get a free gift card with every order! Based in Kenya 🇰🇪",
+    "Premium perfumes and fragrances with elegance. Shop now and get a free gift card with every order! Based in Kenya 🇰🇪",
   generator: 'v0.app',
   manifest: '/manifest.json',
   icons: {
     icon: '/favicon.png',
     shortcut: '/favicon.png',
-    apple: '/logo.jpeg',
+    apple: '/icon-512.png',
   },
   openGraph: {
-    title: 'GLOSSYCLIPSKE | Hair Clips & Lip Gloss',
-    description: 'Premium hair clips and lip gloss for the glow-up generation',
+    title: 'MAISON JOIE | Perfume with Elegance',
+    description: 'Premium perfumes and fragrances with elegance',
     url: process.env.NEXT_PUBLIC_APP_URL,
-    siteName: 'GlossyClipsKE',
+    siteName: 'Maison Joie',
     locale: 'en_KE',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'GLOSSYCLIPSKE | Hair Clips & Lip Gloss',
-    description: 'Premium hair clips and lip gloss for the glow-up generation',
+    title: 'MAISON JOIE | Perfume with Elegance',
+    description: 'Premium perfumes and fragrances with elegance',
   },
   robots: {
     index: true,

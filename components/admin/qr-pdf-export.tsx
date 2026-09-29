@@ -52,7 +52,7 @@ export function QRCodePDFExporter({ code, onPreview }: QRCodePDFExporterProps) {
         doc.setFont("helvetica", "bold")
         doc.setFontSize(16)
         doc.setTextColor(236, 72, 153) // Pink-500
-        doc.text("GLOSSYCLIPSKE", width / 2, 20, { align: "center" })
+        doc.text("MAISON JOIE", width / 2, 20, { align: "center" })
 
         doc.setFont("helvetica", "normal")
         doc.setFontSize(9)
@@ -118,7 +118,7 @@ export function QRCodePDFExporter({ code, onPreview }: QRCodePDFExporterProps) {
         doc.setFont("helvetica", "italic")
         doc.setFontSize(8)
         doc.setTextColor(236, 72, 153)
-        doc.text("glossyclipske.com", centerX, height - 10, { align: "center" })
+        doc.text("maison-joie.vercel.app", centerX, height - 10, { align: "center" })
 
         return doc
     }

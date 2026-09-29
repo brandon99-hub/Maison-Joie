@@ -59,7 +59,7 @@ export const adminLoginSchema = z.object({
 // Product search/filter schema
 export const productFilterSchema = z.object({
     search: z.string().optional(),
-    category: z.enum(["all", "hair-clip", "gloss", "bundle"]).optional(),
+    category: z.string().optional(),
     minPrice: z.number().min(0).optional(),
     maxPrice: z.number().positive().optional(),
     inStockOnly: z.boolean().optional(),

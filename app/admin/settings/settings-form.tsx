@@ -126,7 +126,7 @@ export function SettingsForm({ currentEmail, currentDiscount }: SettingsFormProp
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                placeholder="admin@glossyclipske.com"
+                                placeholder="admin@maisonjoie.co.ke"
                                 required
                                 className="mt-2"
                                 disabled={loading}

@@ -24,7 +24,7 @@ export function SearchInput() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <input
                 className="w-full pl-10 pr-4 py-2 border border-border rounded-full bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-                placeholder="Search for clips, gloss..."
+                placeholder="Search for perfumes, scents..."
                 onChange={(e) => handleSearch(e.target.value)}
                 defaultValue={searchParams.get("search")?.toString()}
             />

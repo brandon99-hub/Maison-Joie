@@ -5,12 +5,7 @@ import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-
-export const HERO_CATEGORIES = [
-  { name: "Hair Clips", slug: "hair-clip" },
-  { name: "Hair Charms", slug: "hair-charm" },
-  { name: "Lip Gloss", slug: "gloss" },
-]
+import { useCategories } from "@/hooks/use-categories"
 
 interface RotatingCategoryButtonProps {
   className?: string
@@ -18,17 +13,22 @@ interface RotatingCategoryButtonProps {
 }
 
 export function RotatingCategoryButton({ className, size = "lg" }: RotatingCategoryButtonProps) {
+  const { categories } = useCategories()
   const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0)
 
   useEffect(() => {
+    if (categories.length === 0) return
+
     const interval = setInterval(() => {
-      setCurrentCategoryIndex((prev) => (prev + 1) % HERO_CATEGORIES.length)
+      setCurrentCategoryIndex((prev) => (prev + 1) % categories.length)
     }, 2500)
 
     return () => clearInterval(interval)
-  }, [])
+  }, [categories.length])
 
-  const currentCategory = HERO_CATEGORIES[currentCategoryIndex]
+  if (categories.length === 0) return null
+
+  const currentCategory = categories[currentCategoryIndex % categories.length]
 
   return (
     <Button

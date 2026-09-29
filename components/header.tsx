@@ -43,7 +43,7 @@ export function Header() {
       <div className="container mx-auto px-4 md:px-8 py-2.5 flex items-center justify-between">
         {/* Logo - Left */}
         <Link href="/" className="flex items-center z-20">
-          <Image src="/logo.jpeg" alt="GLOSSYCLIPSKE" width={42} height={42} className="h-10 w-10 sm:h-11 sm:w-11 rounded-full shadow-xs object-cover" priority />
+          <Image src="/logo2.png" alt="Maison Joie" width={158} height={33} className="h-8 sm:h-9 w-auto object-contain" priority />
         </Link>
 
         {/* Navigation - Centered Absolute on Desktop */}

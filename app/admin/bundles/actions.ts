@@ -4,17 +4,6 @@ import { sql } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { requireAdminAuth } from "@/lib/admin-auth"
 
-const DEFAULT_BUNDLE_IMAGES = [
-  "/cute summer fridays lip gloss key chain charm….jpg",
-  "/i love the new charms.jpg",
-  "/Keep your lippie with you wherever you go by….jpg",
-  "/my pic.jpg",
-]
-
-function getRandomDefaultImage() {
-  return DEFAULT_BUNDLE_IMAGES[Math.floor(Math.random() * DEFAULT_BUNDLE_IMAGES.length)]
-}
-
 export async function createBundle(data: {
   name: string
   description: string
@@ -28,12 +17,9 @@ export async function createBundle(data: {
   if (!auth.authorized) return { success: false, error: auth.error }
 
   try {
-    // If no image provided, use a random default
-    const imageToUse = data.bundle_image || getRandomDefaultImage()
-
     const result = await sql`
       INSERT INTO bundles (name, description, product_ids, original_price, bundle_price, savings, bundle_image)
-      VALUES (${data.name}, ${data.description}, ${data.product_ids}, ${data.original_price}, ${data.bundle_price}, ${data.savings}, ${imageToUse})
+      VALUES (${data.name}, ${data.description}, ${data.product_ids}, ${data.original_price}, ${data.bundle_price}, ${data.savings}, ${data.bundle_image || null})
       RETURNING *
     `
     revalidatePath("/admin/bundles")
@@ -59,18 +45,15 @@ export async function updateBundle(id: number, data: {
   if (!auth.authorized) return { success: false, error: auth.error }
 
   try {
-    // If no image provided, keep existing or use random default
-    const imageToUse = data.bundle_image || getRandomDefaultImage()
-
     const result = await sql`
-      UPDATE bundles 
-      SET name = ${data.name}, 
-          description = ${data.description}, 
-          product_ids = ${data.product_ids}, 
-          original_price = ${data.original_price}, 
-          bundle_price = ${data.bundle_price}, 
+      UPDATE bundles
+      SET name = ${data.name},
+          description = ${data.description},
+          product_ids = ${data.product_ids},
+          original_price = ${data.original_price},
+          bundle_price = ${data.bundle_price},
           savings = ${data.savings},
-          bundle_image = ${imageToUse}
+          bundle_image = ${data.bundle_image || null}
       WHERE id = ${id}
       RETURNING *
     `

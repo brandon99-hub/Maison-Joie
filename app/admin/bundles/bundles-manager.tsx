@@ -3,13 +3,14 @@
 import { useState } from "react"
 import Image from "next/image"
 import { motion, AnimatePresence } from "framer-motion"
-import { Plus, Trash2, Package, Check, Edit2, X, Upload } from "lucide-react"
+import { Plus, Trash2, Package, Check, Edit2, X, Upload, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { createBundle, deleteBundle, toggleBundleStatus, updateBundle } from "./actions"
+import { toast } from "sonner"
 
 interface Product {
   id: number
@@ -31,15 +32,6 @@ interface Bundle {
   created_at: string
 }
 
-const DEFAULT_BUNDLE_IMAGES = [
-  "/cute summer fridays lip gloss key chain charm….jpg",
-  "/i love the new charms.jpg",
-  "/Keep your lippie with you wherever you go by….jpg",
-  "/my pic.jpg",
-  "/charms.jpg",
-  "/gold-hair-claw-clip.jpg",
-]
-
 export function BundlesManager({
   initialBundles,
   products,
@@ -56,8 +48,8 @@ export function BundlesManager({
   const [bundlePrice, setBundlePrice] = useState("")
   const [discountPercentage, setDiscountPercentage] = useState("")
   const [bundleImage, setBundleImage] = useState("")
-  const [selectedDefaultImage, setSelectedDefaultImage] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [uploadingImage, setUploadingImage] = useState(false)
 
   const originalPrice = selectedProducts.reduce((sum, id) => {
     const product = products.find((p) => p.id === id)
@@ -73,7 +65,6 @@ export function BundlesManager({
     setBundlePrice("")
     setDiscountPercentage("")
     setBundleImage("")
-    setSelectedDefaultImage("")
     setSelectedProducts([])
     setEditingBundle(null)
   }
@@ -85,8 +76,32 @@ export function BundlesManager({
     setSelectedProducts(bundle.product_ids)
     setBundlePrice(bundle.bundle_price.toString())
     setBundleImage(bundle.bundle_image || "")
-    setSelectedDefaultImage(bundle.bundle_image || "")
     setShowForm(true)
+  }
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setUploadingImage(true)
+    const data = new FormData()
+    data.append("file", file)
+
+    try {
+      const res = await fetch("/api/upload", { method: "POST", body: data })
+      const json = await res.json()
+      if (json.success) {
+        setBundleImage(json.url)
+      } else {
+        toast.error("Failed to upload image")
+      }
+    } catch (err) {
+      console.error(err)
+      toast.error("Failed to upload image")
+    } finally {
+      setUploadingImage(false)
+      e.target.value = ""
+    }
   }
 
   const handleCreate = async () => {
@@ -94,7 +109,7 @@ export function BundlesManager({
 
     setIsSubmitting(true)
 
-    const imageToUse = bundleImage || selectedDefaultImage || null
+    const imageToUse = bundleImage || null
 
     if (editingBundle) {
       // Update existing bundle
@@ -201,58 +216,45 @@ export function BundlesManager({
                 />
               </div>
 
-              {/* Image Selection */}
+              {/* Image Upload */}
               <div className="space-y-3">
                 <Label>Bundle Image</Label>
 
-                {/* Default Image Selection */}
-                <div>
-                  <p className="text-sm text-muted-foreground mb-2">Choose a default image:</p>
-                  <div className="grid grid-cols-4 gap-2">
-                    {DEFAULT_BUNDLE_IMAGES.map((img) => (
-                      <button
-                        key={img}
-                        type="button"
-                        onClick={() => {
-                          setSelectedDefaultImage(img)
-                          setBundleImage("")
-                        }}
-                        className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${selectedDefaultImage === img ? "border-primary ring-2 ring-primary" : "border-border"
-                          }`}
-                      >
-                        <Image src={img} alt="Default bundle" fill className="object-cover" />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Custom URL Input */}
-                <div>
-                  <Label htmlFor="bundleImage">Or enter custom image URL:</Label>
-                  <Input
-                    id="bundleImage"
-                    placeholder="e.g. /bundle-gloss-clip.jpg"
-                    value={bundleImage}
-                    onChange={(e) => {
-                      setBundleImage(e.target.value)
-                      if (e.target.value) setSelectedDefaultImage("")
-                    }}
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Leave blank to use selected default image
-                  </p>
-                </div>
-
-                {/* Image Preview */}
-                {(bundleImage || selectedDefaultImage) && (
-                  <div className="relative w-32 h-32 rounded-lg overflow-hidden border">
+                {bundleImage ? (
+                  <div className="relative w-32 h-32 rounded-lg overflow-hidden border border-border">
                     <Image
-                      src={bundleImage || selectedDefaultImage}
-                      alt="Preview"
+                      src={bundleImage}
+                      alt="Bundle preview"
                       fill
                       className="object-cover"
                     />
+                    <button
+                      type="button"
+                      onClick={() => setBundleImage("")}
+                      className="absolute top-1 right-1 bg-black/60 hover:bg-black/80 text-white rounded-full p-1 transition-colors"
+                      aria-label="Remove image"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
                   </div>
+                ) : (
+                  <label className="flex flex-col items-center justify-center w-32 h-32 rounded-lg border-2 border-dashed border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50 transition-colors cursor-pointer">
+                    <div className="text-center p-2">
+                      {uploadingImage ? (
+                        <Loader2 className="w-6 h-6 animate-spin mx-auto" />
+                      ) : (
+                        <Upload className="w-6 h-6 mx-auto mb-1 text-muted-foreground" />
+                      )}
+                      <span className="text-xs text-muted-foreground">Upload photo</span>
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleImageUpload}
+                      disabled={uploadingImage}
+                    />
+                  </label>
                 )}
               </div>
 

@@ -3,8 +3,9 @@
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
-import { Instagram, Phone } from "lucide-react"
+import { Phone } from "lucide-react"
 import { useCategories } from "@/hooks/use-categories"
+import { WHATSAPP_NUMBER } from "@/lib/whatsapp"
 
 export function Footer() {
     const pathname = usePathname()
@@ -20,12 +21,11 @@ export function Footer() {
             <div className="container mx-auto px-4 py-12">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div className="col-span-1 md:col-span-1">
-                        <Link href="/" className="flex items-center gap-2 mb-4">
-                            <Image src="/logo.jpeg" alt="GLOSSYCLIPSKE" width={40} height={40} className="rounded-full" />
-                            <span className="font-bold text-lg tracking-tight">GLOSSYCLIPSKE</span>
+                        <Link href="/" className="flex items-center mb-4">
+                            <Image src="/logo2.png" alt="Maison Joie" width={158} height={33} className="h-8 w-auto object-contain" />
                         </Link>
                         <p className="text-muted-foreground text-sm leading-relaxed">
-                            Premium hair clips and lip gloss for the glow-up generation. Based in Kenya 🇰🇪
+                            Premium perfumes and fragrances with elegance. Based in Kenya 🇰🇪
                         </p>
                     </div>
 
@@ -54,15 +54,7 @@ export function Footer() {
                             <h3 className="font-semibold mb-4">Stay Connected</h3>
                             <div className="flex gap-4 mb-4">
                                 <a
-                                    href="https://instagram.com/_glossyclipke_"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="w-10 h-10 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center hover:bg-rose-200 transition-colors"
-                                >
-                                    <Instagram className="h-5 w-5" />
-                                </a>
-                                <a
-                                    href={`https://wa.me/${process.env.NEXT_PUBLIC_MPESA_PHONE_NUMBER}`}
+                                    href={`https://wa.me/${WHATSAPP_NUMBER}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="w-10 h-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center hover:bg-green-200 transition-colors"
@@ -78,7 +70,7 @@ export function Footer() {
                 </div>
 
                 <div className="border-t border-border mt-12 pt-8 text-center text-sm text-muted-foreground">
-                    <p>&copy; {new Date().getFullYear()} GLOSSYCLIPSKE. All rights reserved.</p>
+                    <p>&copy; {new Date().getFullYear()} MAISON JOIE. All rights reserved.</p>
                 </div>
             </div>
         </footer>

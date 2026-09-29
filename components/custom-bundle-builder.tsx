@@ -23,13 +23,6 @@ interface CustomBundleBuilderProps {
     products: Product[]
 }
 
-const DEFAULT_BUNDLE_IMAGES = [
-    "/cute summer fridays lip gloss key chain charm….jpg",
-    "/i love the new charms.jpg",
-    "/Keep your lippie with you wherever you go by….jpg",
-    "/my pic.jpg", // Fixed: removed emoji from filename
-]
-
 export function CustomBundleBuilder({ products }: CustomBundleBuilderProps) {
     const [selectedProducts, setSelectedProducts] = useState<number[]>([])
     const [searchQuery, setSearchQuery] = useState("")
@@ -63,14 +56,7 @@ export function CustomBundleBuilder({ products }: CustomBundleBuilderProps) {
     const discountAmount = Math.round(originalTotal * (discountPercent / 100))
     const finalPrice = originalTotal - discountAmount
 
-    // Category validation
-    const categories_in_selection = selectedItems.map(p => p.category)
-    const hasHairClip = categories_in_selection.includes("hair-clip")
-    const hasGloss = categories_in_selection.includes("gloss")
-    const isMixedCategory = hasHairClip && hasGloss
-    const isSameCategory = categories_in_selection.length > 0 && new Set(categories_in_selection).size === 1
-
-    const isValidBundle = selectedProducts.length >= 2 && (isMixedCategory || isSameCategory)
+    const isValidBundle = selectedProducts.length >= 2
 
     const toggleProduct = (productId: number) => {
         setSelectedProducts(prev =>
@@ -83,8 +69,8 @@ export function CustomBundleBuilder({ products }: CustomBundleBuilderProps) {
     const handleAddToCart = () => {
         if (!isValidBundle) return
 
-        // Select random default image for bundle
-        const randomImage = DEFAULT_BUNDLE_IMAGES[Math.floor(Math.random() * DEFAULT_BUNDLE_IMAGES.length)]
+        // Use the first selected product's image to represent the bundle
+        const randomImage = selectedItems.find(p => p.images?.[0])?.images?.[0] || ""
 
         // Calculate discounted price per item
         const discountMultiplier = 1 - (discountPercent / 100)
@@ -287,15 +273,6 @@ export function CustomBundleBuilder({ products }: CustomBundleBuilderProps) {
                         <Alert variant="destructive">
                             <AlertCircle className="h-4 w-4" />
                             <AlertDescription>Select at least 2 products to create a bundle.</AlertDescription>
-                        </Alert>
-                    )}
-
-                    {selectedProducts.length >= 2 && !isMixedCategory && !isSameCategory && (
-                        <Alert>
-                            <AlertCircle className="h-4 w-4" />
-                            <AlertDescription>
-                                Mix categories (Hair Clip + Lip Gloss) or select products from the same category.
-                            </AlertDescription>
                         </Alert>
                     )}
 

@@ -257,7 +257,7 @@ export function DashboardClient({ orders, customer, addresses }: DashboardClient
                                 My Dashboard
                             </h1>
                             <p className="text-sm sm:text-base text-muted-foreground font-medium">
-                                Welcome back, <span className="text-rose-600">{customer.name || "Gloss Babe"}</span>! ✨
+                                Welcome back, <span className="text-rose-600">{customer.name || "Fragrance Lover"}</span>! ✨
                             </p>
                         </div>
                         <div className="flex items-center gap-2 w-full sm:w-auto">

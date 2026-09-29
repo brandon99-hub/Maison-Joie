@@ -192,29 +192,21 @@ export async function getProductRecommendations(limit = 6) {
 
         const categoriesArray = Array.from(purchasedCategories)
 
-        // Determine complementary category
-        const hasHairClip = categoriesArray.includes('hair-clip')
-        const hasGloss = categoriesArray.includes('gloss')
-        const complementaryCategory = hasHairClip && !hasGloss ? 'gloss' :
-            hasGloss && !hasHairClip ? 'hair-clip' : null
-
-        // Smart recommendations: prioritize same category, then complementary, then popular
+        // Smart recommendations: prioritize same category, then popular
         const recommendations = await sql`
       SELECT * FROM products
-      WHERE is_active = true 
+      WHERE is_active = true
       AND is_secret = false
       AND stock_quantity > 0
       AND id != ALL(${purchasedProductIds})
-      ORDER BY 
+      ORDER BY
         -- Priority 1: Same category as purchased items
         CASE WHEN category = ANY(${categoriesArray.length > 0 ? categoriesArray : ['']}) THEN 0 ELSE 1 END,
-        -- Priority 2: Complementary category (cross-sell)
-        CASE WHEN category = ${complementaryCategory || ''} THEN 0 ELSE 1 END,
-        -- Priority 3: Popular items
+        -- Priority 2: Popular items
         wishlist_count DESC,
-        -- Priority 4: Highly rated
+        -- Priority 3: Highly rated
         average_rating DESC NULLS LAST,
-        -- Priority 5: New arrivals
+        -- Priority 4: New arrivals
         created_at DESC
       LIMIT ${limit}
     `

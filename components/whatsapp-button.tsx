@@ -5,8 +5,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { MessageCircle, X } from "lucide-react"
 import { usePathname } from "next/navigation"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-
-const WHATSAPP_NUMBER = "254745717591"
+import { WHATSAPP_NUMBER } from "@/lib/whatsapp"
 
 export function WhatsAppButton() {
   const [isOpen, setIsOpen] = useState(false)

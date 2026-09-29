@@ -8,8 +8,6 @@ import { Button } from "@/components/ui/button"
 import { BundleCarousel } from "@/components/bundle-carousel"
 import { RotatingCategoryButton } from "@/components/rotating-category-button"
 
-const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_MPESA_PHONE_NUMBER || "254741991213"
-
 interface Bundle {
     id: number
     name: string
@@ -51,8 +49,8 @@ export function DesktopHero({ bundles = [] }: DesktopHeroProps) {
                             </h1>
 
                             <p className="text-lg text-muted-foreground mb-6 max-w-lg leading-relaxed">
-                                Premium hair accessories and lip glosses designed for the modern aesthetic.
-                                Elevate your daily look with our curated collection.
+                                Premium perfumes and fragrances designed for the modern aesthetic.
+                                Elevate your signature scent with our curated collection.
                             </p>
 
                             <div className="flex items-center gap-4">

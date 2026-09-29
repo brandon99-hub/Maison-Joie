@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next'
 import { sql, type Product } from '@/lib/db'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://glossy-clips-ke-2.vercel.app'
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://maison-joie.vercel.app'
 
     // Fetch all active products
     const products = await sql`

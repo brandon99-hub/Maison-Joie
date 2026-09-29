@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
             allow: '/',
             disallow: ['/admin/', '/api/', '/dashboard/'],
         },
-        sitemap: `${process.env.NEXT_PUBLIC_APP_URL || 'https://glossy-clips-ke-2.vercel.app'}/sitemap.xml`,
+        sitemap: `${process.env.NEXT_PUBLIC_APP_URL || 'https://maison-joie.vercel.app'}/sitemap.xml`,
     }
 }

@@ -10,7 +10,7 @@ export function generateProductSchema(product: Product, reviews?: any[]) {
         sku: product.id.toString(),
         brand: {
             "@type": "Brand",
-            name: "GlossyClipsKE",
+            name: "Maison Joie",
         },
         offers: {
             "@type": "Offer",
@@ -45,10 +45,10 @@ export function generateOrganizationSchema() {
     return {
         "@context": "https://schema.org",
         "@type": "Organization",
-        name: "GlossyClipsKE",
-        description: "Premium hair clips and lip gloss in Kenya",
+        name: "Maison Joie",
+        description: "Premium perfumes and fragrances in Kenya",
         url: process.env.NEXT_PUBLIC_APP_URL,
-        logo: `${process.env.NEXT_PUBLIC_APP_URL}/logo.png`,
+        logo: `${process.env.NEXT_PUBLIC_APP_URL}/logo2.png`,
         sameAs: [
             // Add social media links here
         ],

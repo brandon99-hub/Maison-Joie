@@ -16,10 +16,10 @@ export async function generateMetadata({
   if (!products.length) return { title: "Product Not Found" }
 
   const product = products[0]
-  const ogImage = product.images && product.images.length > 0 ? product.images[0] : "/logo.jpeg"
+  const ogImage = product.images && product.images.length > 0 ? product.images[0] : "/logo2.png"
 
   return {
-    title: `${product.name} | GLOSSYCLIPSKE`,
+    title: `${product.name} | MAISON JOIE`,
     description: product.description.substring(0, 160),
     openGraph: {
       title: product.name,
@@ -62,7 +62,7 @@ export default async function ProductPage({
     sku: product.id.toString(),
     brand: {
       "@type": "Brand",
-      name: "GLOSSYCLIPSKE",
+      name: "MAISON JOIE",
     },
     offers: {
       "@type": "Offer",

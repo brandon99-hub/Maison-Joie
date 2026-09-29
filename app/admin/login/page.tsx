@@ -44,17 +44,14 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-md relative z-10">
         {/* Logo and Header */}
         <div className="text-center mb-8">
-          <div className="w-20 h-20 mx-auto mb-4 relative">
+          <div className="w-56 h-16 mx-auto mb-4 relative">
             <Image
-              src="/logo.jpeg"
-              alt="GLOSSYCLIPSKE"
+              src="/logo2.png"
+              alt="Maison Joie"
               fill
-              className="rounded-full object-cover shadow-lg ring-4 ring-white"
+              className="object-contain"
             />
           </div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent mb-2">
-            GLOSSYCLIPSKE
-          </h1>
           <p className="text-gray-600">Admin Dashboard</p>
         </div>
 

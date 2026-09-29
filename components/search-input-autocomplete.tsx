@@ -123,7 +123,7 @@ export function SearchInputWithAutocomplete({ className }: SearchInputWithAutoco
                 <input
                     type="text"
                     className="w-full pl-10 pr-10 py-3 border border-border rounded-full bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-                    placeholder="Search for clips, gloss..."
+                    placeholder="Search for perfumes, scents..."
                     value={query}
                     onChange={(e) => handleInputChange(e.target.value)}
                     onFocus={() => setIsOpen(true)}

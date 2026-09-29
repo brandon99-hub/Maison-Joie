@@ -1,6 +1,7 @@
 "use client"
 
 import type { Product, Testimonial } from "@/lib/db"
+import { ShoppingBag } from "lucide-react"
 import { HeroSection } from "@/components/hero-section"
 import { CategoryGrid } from "@/components/category-grid"
 import { ProductCard } from "@/components/product-card"
@@ -8,6 +9,15 @@ import { TestimonialsCarousel } from "@/components/testimonials-carousel"
 import { SwipeNavigation } from "@/components/swipe-navigation"
 import { DesktopHero } from "@/components/desktop-hero"
 import { DesktopCategoryGrid } from "@/components/desktop-category-grid"
+
+function EmptyProductsState() {
+    return (
+        <div className="text-center py-12">
+            <ShoppingBag className="h-10 w-10 mx-auto mb-3 text-muted-foreground/40" />
+            <p className="text-muted-foreground">New arrivals coming soon — check back shortly!</p>
+        </div>
+    )
+}
 
 interface HomeClientProps {
     products: Product[]
@@ -45,11 +55,15 @@ export function HomeClient({ products, testimonials, bundles, bundlesSection }: 
                     <div className="container mx-auto">
                         <h2 className="text-2xl font-bold text-center mb-2">New Arrivals</h2>
                         <p className="text-muted-foreground text-center mb-8">Fresh drops you need in your life</p>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
-                            {products.map((product) => (
-                                <ProductCard key={product.id} product={product} />
-                            ))}
-                        </div>
+                        {products.length > 0 ? (
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+                                {products.map((product) => (
+                                    <ProductCard key={product.id} product={product} />
+                                ))}
+                            </div>
+                        ) : (
+                            <EmptyProductsState />
+                        )}
                     </div>
                 </section>
 
@@ -60,11 +74,15 @@ export function HomeClient({ products, testimonials, bundles, bundlesSection }: 
                             <h2 className="text-4xl font-bold mb-4">New Arrivals</h2>
                             <p className="text-lg text-muted-foreground">Fresh drops you need in your life</p>
                         </div>
-                        <div className="grid grid-cols-4 gap-8 max-w-7xl mx-auto">
-                            {products.map((product) => (
-                                <ProductCard key={product.id} product={product} />
-                            ))}
-                        </div>
+                        {products.length > 0 ? (
+                            <div className="grid grid-cols-4 gap-8 max-w-7xl mx-auto">
+                                {products.map((product) => (
+                                    <ProductCard key={product.id} product={product} />
+                                ))}
+                            </div>
+                        ) : (
+                            <EmptyProductsState />
+                        )}
                     </div>
                 </section>
 

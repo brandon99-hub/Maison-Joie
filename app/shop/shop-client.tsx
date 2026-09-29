@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { Sparkles } from "lucide-react"
 import { ProductCard } from "@/components/product-card"
 import { SearchInputWithAutocomplete } from "@/components/search-input-autocomplete"
 import { ProductFiltersImproved, type FilterState } from "@/components/product-filters-improved"
@@ -164,6 +165,11 @@ export function ShopClient({ initialProducts, maxPrice }: ShopClientProps) {
                     {filteredProducts.map((product) => (
                         <ProductCard key={product.id} product={product} />
                     ))}
+                </div>
+            ) : initialProducts.length === 0 ? (
+                <div className="text-center py-12">
+                    <Sparkles className="h-10 w-10 mx-auto mb-3 text-muted-foreground/40" />
+                    <p className="text-muted-foreground">No products yet — new fragrances coming soon!</p>
                 </div>
             ) : (
                 <div className="text-center py-12">

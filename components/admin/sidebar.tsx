@@ -77,14 +77,13 @@ export function AdminSidebar() {
         <div className="h-14 px-6 border-b border-border/70 flex items-center">
           <Link href="/admin" className="flex items-center gap-2.5 font-semibold tracking-tight text-foreground hover:opacity-90 transition-opacity">
             <Image
-              src="/logo.jpeg"
-              alt="GLOSSYCLIPSKE"
-              width={28}
+              src="/logo2.png"
+              alt="Maison Joie"
+              width={132}
               height={28}
-              className="w-7 h-7 rounded-full shadow-xs object-cover border border-border/70"
+              className="h-6 w-auto object-contain"
               priority
             />
-            <span className="text-sm font-bold tracking-wider">GLOSSYCLIPSKE</span>
           </Link>
         </div>
 

@@ -6,19 +6,19 @@ const transporter = nodemailer.createTransport({
   port: Number(process.env.SMTP_PORT) || 587,
   secure: false, // true for 465, false for other ports
   auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
 })
 
 export async function sendPasswordResetEmail(email: string, token: string) {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://glossy-clips-ke-2.vercel.app"
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://maison-joie.vercel.app"
   const resetUrl = `${baseUrl}/admin/reset-password/${token}`
 
   const mailOptions = {
-    from: process.env.SMTP_FROM || `"GLOSSYCLIPSKE Admin" <${process.env.SMTP_USER}>`,
+    from: process.env.SMTP_FROM || `"Maison Joie Admin" <${process.env.EMAIL_USER}>`,
     to: email,
-    subject: "Reset Your Password - GLOSSYCLIPSKE Admin",
+    subject: "Reset Your Password - Maison Joie Admin",
     html: `
       <!DOCTYPE html>
       <html>
@@ -41,7 +41,7 @@ export async function sendPasswordResetEmail(email: string, token: string) {
             </div>
             <div class="content">
               <p>Hello,</p>
-              <p>We received a request to reset your password for your GLOSSYCLIPSKE admin account.</p>
+              <p>We received a request to reset your password for your Maison Joie admin account.</p>
               <p>Click the button below to reset your password:</p>
               <p style="text-align: center;">
                 <a href="${resetUrl}" class="button">Reset Password</a>
@@ -60,7 +60,7 @@ export async function sendPasswordResetEmail(email: string, token: string) {
               </div>
             </div>
             <div class="footer">
-              <p>© ${new Date().getFullYear()} GLOSSYCLIPSKE. All rights reserved.</p>
+              <p>© ${new Date().getFullYear()} Maison Joie. All rights reserved.</p>
               <p>This is an automated email, please do not reply.</p>
             </div>
           </div>
@@ -79,7 +79,7 @@ export async function sendPasswordResetEmail(email: string, token: string) {
 }
 
 export async function sendAbandonedCartEmail(email: string, customerName: string, items: CartItem[]) {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://glossy-clips-ke-2.vercel.app"
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://maison-joie.vercel.app"
   const cartUrl = `${baseUrl}/cart`
   const itemsHtml = items.map(item => `
     <div style="display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee;">
@@ -92,7 +92,7 @@ export async function sendAbandonedCartEmail(email: string, customerName: string
   `).join('')
 
   const mailOptions = {
-    from: process.env.SMTP_FROM || `"GLOSSYCLIPSKE" <${process.env.SMTP_USER}>`,
+    from: process.env.SMTP_FROM || `"Maison Joie" <${process.env.EMAIL_USER}>`,
     to: email,
     subject: "Still thinking about it? Your cart is waiting! ✨",
     html: `
@@ -115,7 +115,7 @@ export async function sendAbandonedCartEmail(email: string, customerName: string
         <body>
           <div class="container">
             <div class="header">
-              <h1>GLOSSYCLIPSKE</h1>
+              <h1>Maison Joie</h1>
             </div>
             <div class="content">
               <p class="hero-text">Hi ${customerName || 'Gorgeous'},</p>
@@ -126,7 +126,7 @@ export async function sendAbandonedCartEmail(email: string, customerName: string
                 ${itemsHtml}
               </div>
 
-              <p>Ready to complete your glow-up? These items might sell out soon!</p>
+              <p>Ready to complete your collection? These items might sell out soon!</p>
               
               <p style="text-align: center;">
                 <a href="${cartUrl}" class="button">Complete My Order</a>
@@ -137,8 +137,8 @@ export async function sendAbandonedCartEmail(email: string, customerName: string
               </p>
             </div>
             <div class="footer">
-              <p>© ${new Date().getFullYear()} GLOSSYCLIPSKE. Based in Kenya 🇰🇪</p>
-              <p>Stay Glossy! ✨</p>
+              <p>© ${new Date().getFullYear()} Maison Joie. Based in Kenya 🇰🇪</p>
+              <p>Stay Fabulous! ✨</p>
             </div>
           </div>
         </body>
@@ -161,11 +161,11 @@ export async function sendBackInStockEmail(
   productSlug: string,
   productImage?: string
 ) {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://glossy-clips-ke-2.vercel.app"
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://maison-joie.vercel.app"
   const productUrl = `${baseUrl}/product/${productSlug}`
 
   const mailOptions = {
-    from: process.env.SMTP_FROM || `"GLOSSYCLIPSKE" <${process.env.SMTP_USER}>`,
+    from: process.env.SMTP_FROM || `"Maison Joie" <${process.env.EMAIL_USER}>`,
     to: email,
     subject: `🎉 ${productName} is Back in Stock!`,
     html: `
@@ -192,7 +192,7 @@ export async function sendBackInStockEmail(
         <body>
           <div class="container">
             <div class="header">
-              <h1>✨ GLOSSYCLIPSKE</h1>
+              <h1>✨ Maison Joie</h1>
             </div>
             <div class="content">
               <p style="font-size: 18px; color: #1e293b; font-weight: bold; margin-bottom: 8px;">Great news!</p>
@@ -218,8 +218,8 @@ export async function sendBackInStockEmail(
               </p>
             </div>
             <div class="footer">
-              <p>© ${new Date().getFullYear()} GLOSSYCLIPSKE. Based in Kenya 🇰🇪</p>
-              <p>Stay Glossy! ✨</p>
+              <p>© ${new Date().getFullYear()} Maison Joie. Based in Kenya 🇰🇪</p>
+              <p>Stay Fabulous! ✨</p>
             </div>
           </div>
         </body>
@@ -237,13 +237,13 @@ export async function sendBackInStockEmail(
 }
 
 export async function sendCustomerPasswordResetEmail(email: string, token: string) {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://glossy-clips-ke-2.vercel.app"
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://maison-joie.vercel.app"
   const resetUrl = `${baseUrl}/reset-password/${token}`
 
   const mailOptions = {
-    from: process.env.SMTP_FROM || `"GLOSSYCLIPSKE" <${process.env.SMTP_USER}>`,
+    from: process.env.SMTP_FROM || `"Maison Joie" <${process.env.EMAIL_USER}>`,
     to: email,
-    subject: "Reset Your GLOSSYCLIPSKE Password ✨",
+    subject: "Reset Your Maison Joie Password ✨",
     html: `
       <!DOCTYPE html>
       <html>
@@ -265,12 +265,12 @@ export async function sendCustomerPasswordResetEmail(email: string, token: strin
           <div class="container">
             <div class="card">
               <div class="header">
-                <h1>GLOSSYCLIPSKE ✨</h1>
+                <h1>Maison Joie ✨</h1>
               </div>
               <div class="content">
                 <h2 style="font-size: 18px; margin-top: 0; color: #0f172a;">Password Reset Request</h2>
                 <p>Hello Gorgeous,</p>
-                <p>We received a request to reset the password for your GLOSSYCLIPSKE account. Click the button below to choose a new password:</p>
+                <p>We received a request to reset the password for your Maison Joie account. Click the button below to choose a new password:</p>
                 <div style="text-align: center;">
                   <a href="${resetUrl}" class="button">Reset My Password</a>
                 </div>
@@ -280,7 +280,7 @@ export async function sendCustomerPasswordResetEmail(email: string, token: strin
               </div>
             </div>
             <div class="footer">
-              <p>© ${new Date().getFullYear()} GLOSSYCLIPSKE • Nairobi, Kenya</p>
+              <p>© ${new Date().getFullYear()} Maison Joie • Nairobi, Kenya</p>
             </div>
           </div>
         </body>

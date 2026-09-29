@@ -1,15 +1,15 @@
 {
-  "name": "my-v0-project",
+  "name": "maison-joie",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "build": "next build",
-    "dev": "next dev",
+    "dev": "next dev -p 3001",
     "lint": "eslint .",
-    "start": "next start",
-    "scrape:pickup-locations": "tsx scripts/scrapers/scrape-pickup-locations.ts",
-    "clear:orders": "node scripts/maintenance/clear-orders.js",
+    "start": "next start -p 3001",
     "seed:admin": "node scripts/maintenance/seed-admin.js",
+    "seed:catalog": "node scripts/maintenance/seed-perfume-catalog.js",
+    "import:pickup-locations": "node scripts/maintenance/import-pickup-locations.js",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio"
   },

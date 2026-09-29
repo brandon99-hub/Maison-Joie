@@ -10,9 +10,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { GiftCardRevealModal } from "@/components/gift-card-reveal"
 import { AccountCreationPrompt } from "@/components/account-creation-prompt"
 import { motion } from "framer-motion"
+import { WHATSAPP_NUMBER } from "@/lib/whatsapp"
 
-const MPESA_PHONE = process.env.NEXT_PUBLIC_MPESA_PHONE_NUMBER || "254741991213"
-const MPESA_BUSINESS_NAME = process.env.NEXT_PUBLIC_MPESA_BUSINESS_NAME || "GlossyClipsKE"
+const MPESA_PHONE = WHATSAPP_NUMBER
+const MPESA_BUSINESS_NAME = process.env.NEXT_PUBLIC_MPESA_BUSINESS_NAME
 
 export default function SuccessPage() {
   const params = useParams()
@@ -45,7 +46,7 @@ export default function SuccessPage() {
   }
 
   const openWhatsApp = () => {
-    const message = `Hi GlossyClipsKE! 👋\\n\\nI'd like to place this order:\\n\\n📦 ORDER ${reference}\\n\\nPlease confirm my exact total and send payment details! 🙏`
+    const message = `Hi Maison Joie! 👋\\n\\nI'd like to place this order:\\n\\n📦 ORDER ${reference}\\n\\nPlease confirm my exact total and send payment details! 🙏`
     window.open(`https://wa.me/${MPESA_PHONE}?text=${encodeURIComponent(message)}`, "_blank")
   }
 
@@ -133,7 +134,7 @@ export default function SuccessPage() {
                   <div className="flex items-center justify-between bg-gradient-to-r from-pink-50 to-purple-50 p-3 rounded-lg border border-pink-200">
                     <div>
                       <p className="font-bold text-lg">{MPESA_PHONE}</p>
-                      <p className="text-sm text-muted-foreground">{MPESA_BUSINESS_NAME}</p>
+                      {MPESA_BUSINESS_NAME && <p className="text-sm text-muted-foreground">{MPESA_BUSINESS_NAME}</p>}
                     </div>
                     <Button
                       size="sm"
@@ -262,7 +263,7 @@ export default function SuccessPage() {
               <div className="flex items-center justify-between bg-white p-3 rounded-lg">
                 <div>
                   <p className="font-bold text-lg">{MPESA_PHONE}</p>
-                  <p className="text-sm text-muted-foreground">{MPESA_BUSINESS_NAME}</p>
+                  {MPESA_BUSINESS_NAME && <p className="text-sm text-muted-foreground">{MPESA_BUSINESS_NAME}</p>}
                 </div>
                 <Button
                   size="sm"

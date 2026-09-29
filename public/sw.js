@@ -1,5 +1,5 @@
 // Service Worker for PWA
-const CACHE_NAME = 'glossyke-v2' // Bumped version to force update
+const CACHE_NAME = 'maisonjoie-v1' // Bumped version to force update (rebrand)
 const OFFLINE_URL = '/offline'
 
 const STATIC_ASSETS = [

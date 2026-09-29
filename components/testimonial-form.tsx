@@ -174,7 +174,7 @@ export function TestimonialForm({ onClose, onSuccess }: TestimonialFormProps) {
                             id="message"
                             value={message}
                             onChange={(e) => setMessage(e.target.value)}
-                            placeholder="Tell us what you love about GlossyClipsKE..."
+                            placeholder="Tell us what you love about Maison Joie..."
                             required
                             maxLength={280}
                             rows={4}

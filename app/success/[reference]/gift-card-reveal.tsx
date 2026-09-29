@@ -174,7 +174,7 @@ export function GiftCardReveal({ order, giftCard }: { order: Order; giftCard: Gi
     if (navigator.share) {
       try {
         await navigator.share({
-          title: "I just got a gift card from GLOSSYCLIPSKE!",
+          title: "I just got a gift card from MAISON JOIE!",
           text: `Just ordered some goodies and got a KES ${giftCard?.value} gift card!`,
           url: window.location.href,
         })

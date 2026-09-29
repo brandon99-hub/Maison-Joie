@@ -59,17 +59,17 @@ export default function RegisterPage() {
         <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-gradient-to-br from-rose-50 via-pink-50 to-white">
             <div className="w-full max-w-md">
                 <div className="text-center mb-8">
-                    <div className="w-16 h-16 mx-auto mb-4 relative">
+                    <div className="w-52 h-14 mx-auto mb-4 relative">
                         <Image
-                            src="/logo.jpeg"
-                            alt="GLOSSYCLIPSKE"
+                            src="/logo2.png"
+                            alt="Maison Joie"
                             fill
-                            className="rounded-full object-cover shadow-md ring-4 ring-rose-100/70"
+                            className="object-contain"
                             priority
                         />
                     </div>
                     <h1 className="text-3xl font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent mb-2">
-                        Join the Gloss Gang!
+                        Join the Joie Club!
                     </h1>
                     <p className="text-muted-foreground">Create your account and start shopping</p>
                 </div>

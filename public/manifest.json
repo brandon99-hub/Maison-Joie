@@ -1,7 +1,7 @@
 {
-    "name": "GlossyClipsKE",
-    "short_name": "GlossyKE",
-    "description": "Premium hair clips and lip gloss in Kenya - Shop the latest beauty accessories",
+    "name": "Maison Joie",
+    "short_name": "MaisonJoie",
+    "description": "Premium perfumes and fragrances in Kenya - Shop the latest scents",
     "start_url": "/",
     "display": "standalone",
     "orientation": "portrait-primary",
@@ -22,13 +22,5 @@
     "categories": [
         "shopping",
         "lifestyle"
-    ],
-    "screenshots": [
-        {
-            "src": "/screenshot-mobile.png",
-            "sizes": "390x844",
-            "type": "image/png",
-            "form_factor": "narrow"
-        }
     ]
 }

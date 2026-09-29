@@ -19,13 +19,6 @@ interface Bundle {
   products?: { id: number; name: string; images: string[] }[]
 }
 
-const DEFAULT_BUNDLE_IMAGES = [
-  "/cute summer fridays lip gloss key chain charm….jpg",
-  "/i love the new charms.jpg",
-  "/Keep your lippie with you wherever you go by….jpg",
-  "/my pic.jpg",
-]
-
 export function BundleCard({ bundle }: { bundle: Bundle }) {
   const { addItem } = useCart()
 
@@ -40,8 +33,8 @@ export function BundleCard({ bundle }: { bundle: Bundle }) {
       // Calculate discounted price per product
       const discountedPricePerProduct = Math.round(bundle.bundle_price / products.length)
 
-      // Get bundle image or use default
-      const bundleImage = bundle.bundle_image || DEFAULT_BUNDLE_IMAGES[Math.floor(Math.random() * DEFAULT_BUNDLE_IMAGES.length)]
+      // Get bundle image or fall back to the first product's own image
+      const bundleImage = bundle.bundle_image || products.find((p: any) => p.images?.[0])?.images?.[0] || ""
 
       // Add each product to cart with bundle price
       products.forEach((product: any) => {
@@ -74,8 +67,8 @@ export function BundleCard({ bundle }: { bundle: Bundle }) {
     }
   }
 
-  // Get bundle image or use default
-  const bundleImage = bundle.bundle_image || DEFAULT_BUNDLE_IMAGES[0]
+  // Get bundle image or fall back to the first product's own image
+  const bundleImage = bundle.bundle_image || bundle.products?.find((p) => p.images?.[0])?.images?.[0]
 
   return (
     <motion.div
@@ -85,12 +78,18 @@ export function BundleCard({ bundle }: { bundle: Bundle }) {
     >
       {/* Bundle Image */}
       <div className="relative w-full h-48 bg-gradient-to-br from-rose-50 to-pink-50">
-        <Image
-          src={bundleImage}
-          alt={bundle.name}
-          fill
-          className="object-cover"
-        />
+        {bundleImage ? (
+          <Image
+            src={bundleImage}
+            alt={bundle.name}
+            fill
+            className="object-cover"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <Sparkles className="w-10 h-10 text-rose-300" />
+          </div>
+        )}
         {/* Savings badge */}
         <div className="absolute top-3 right-3 bg-rose-500 text-white text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1 shadow-lg">
           <Sparkles className="w-3 h-3" />

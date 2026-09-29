@@ -26,14 +26,14 @@ function getDatabaseUrl() {
 
 async function seedAdmin() {
   console.log("=========================================");
-  console.log("    GlossyKE - Seed Admin Account        ");
+  console.log("    Maison Joie - Seed Admin Account      ");
   console.log("=========================================\n");
 
   const databaseUrl = getDatabaseUrl();
   const sql = neon(databaseUrl);
 
   const targetUsername = "Administrator";
-  const targetEmail = "admin@Glossclips.co.ke";
+  const targetEmail = "admin@maisonjoie.co.ke";
   const defaultFallbackPassword = "Temppassword-123";
 
   try {
