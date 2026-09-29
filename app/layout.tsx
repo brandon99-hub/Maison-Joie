@@ -27,7 +27,7 @@ const dancing = Dancing_Script({
 export const metadata: Metadata = {
   title: "MAISON JOIE | Perfume with Elegance",
   description:
-    "Premium perfumes and fragrances with elegance. Shop now and get a free gift card with every order! Based in Kenya 🇰🇪",
+    "Premium perfumes and fragrances with elegance. Based in Kenya 🇰🇪",
   generator: 'v0.app',
   manifest: '/manifest.json',
   icons: {

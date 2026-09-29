@@ -69,11 +69,11 @@ export function AccountCreationPrompt({ referenceCode, orderEmail }: AccountCrea
                 <div className="flex items-center gap-2 mb-2">
                     <Sparkles className="w-6 h-6 text-rose-600" />
                     <CardTitle className="text-xl bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent">
-                        Track Your Order & Save Your Gift Card!
+                        Track Your Order & Save Time Next Visit!
                     </CardTitle>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                    Create your account below to link this order and keep your gift card credit safe to use on your next order.
+                    Create your account below to link this order and track it in real-time.
                 </p>
             </CardHeader>
 

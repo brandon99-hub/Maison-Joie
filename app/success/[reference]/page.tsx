@@ -7,7 +7,6 @@ import { CheckCircle, Copy, Check, MessageCircle, ShoppingBag, Sparkles, Gift } 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { GiftCardRevealModal } from "@/components/gift-card-reveal"
 import { AccountCreationPrompt } from "@/components/account-creation-prompt"
 import { motion } from "framer-motion"
 import { WHATSAPP_NUMBER } from "@/lib/whatsapp"
@@ -108,9 +107,6 @@ export default function SuccessPage() {
               Your secret reference: <span className="font-mono font-bold text-foreground">{reference}</span>
             </p>
           </motion.div>
-
-          {/* Gift Card Reveal Modal */}
-          <GiftCardRevealModal />
 
           {/* Account Creation Prompt */}
           <AccountCreationPrompt referenceCode={reference} />
@@ -245,9 +241,6 @@ export default function SuccessPage() {
           <h1 className="text-3xl font-bold mb-2">Order Sent!</h1>
           <p className="text-muted-foreground italic">Your reference code is: <span className="font-mono font-bold text-foreground">{reference}</span></p>
         </div>
-
-        {/* Gift Card Reveal Modal */}
-        <GiftCardRevealModal />
 
         {/* Account Creation Prompt */}
         <AccountCreationPrompt referenceCode={reference} />

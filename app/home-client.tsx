@@ -97,18 +97,6 @@ export function HomeClient({ products, testimonials, bundles, bundlesSection }: 
                     </section>
                 )}
 
-                {/* Gift Card Teaser */}
-                <section className="py-12 px-4">
-                    <div className="container mx-auto max-w-md text-center">
-                        <div className="bg-gradient-to-br from-rose-100 to-amber-50 rounded-3xl p-8">
-                            <span className="text-4xl mb-4 block">🎁</span>
-                            <h2 className="text-xl font-bold mb-2">Free Gift Card</h2>
-                            <p className="text-muted-foreground text-sm">
-                                Every order comes with a surprise gift card reveal. Scratch to see your reward!
-                            </p>
-                        </div>
-                    </div>
-                </section>
             </div>
         </SwipeNavigation>
     )

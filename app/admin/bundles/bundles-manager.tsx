@@ -2,13 +2,18 @@
 
 import { useState } from "react"
 import Image from "next/image"
-import { motion, AnimatePresence } from "framer-motion"
-import { Plus, Trash2, Package, Check, Edit2, X, Upload, Loader2 } from "lucide-react"
+import { motion } from "framer-motion"
+import { Plus, Trash2, Package, Check, Edit2, X, Upload, Loader2, ChevronsUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Command, CommandEmpty, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
+import { AdminPageHeader } from "@/components/admin/admin-page-header"
+import { cn } from "@/lib/utils"
 import { createBundle, deleteBundle, toggleBundleStatus, updateBundle } from "./actions"
 import { toast } from "sonner"
 
@@ -50,6 +55,7 @@ export function BundlesManager({
   const [bundleImage, setBundleImage] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [uploadingImage, setUploadingImage] = useState(false)
+  const [productPickerOpen, setProductPickerOpen] = useState(false)
 
   const originalPrice = selectedProducts.reduce((sum, id) => {
     const product = products.find((p) => p.id === id)
@@ -82,6 +88,17 @@ export function BundlesManager({
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file")
+      e.target.value = ""
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be under 5MB")
+      e.target.value = ""
+      return
+    }
 
     setUploadingImage(true)
     const data = new FormData()
@@ -171,36 +188,33 @@ export function BundlesManager({
 
   return (
     <div className="space-y-6">
-      {/* Create Bundle Button */}
-      <Button onClick={() => { setShowForm(!showForm); if (showForm) resetForm(); }} className="gap-2">
-        <Plus className="w-4 h-4" />
-        Create Bundle Deal
-      </Button>
+      <AdminPageHeader
+        title="Bundle Deals"
+        description="Create special product bundles and promotional combos to boost sales."
+        actions={
+          <Button onClick={() => setShowForm(true)} className="gap-2">
+            <Plus className="w-4 h-4" />
+            Create Bundle Deal
+          </Button>
+        }
+      />
 
-      {/* Create/Edit Form */}
-      <AnimatePresence>
-        {showForm && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="bg-card border border-border rounded-xl p-6 overflow-hidden"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold">{editingBundle ? "Edit Bundle Deal" : "New Bundle Deal"}</h3>
-              {editingBundle && (
-                <Button variant="ghost" size="sm" onClick={resetForm}>
-                  <X className="w-4 h-4 mr-1" /> Cancel Edit
-                </Button>
-              )}
-            </div>
+      {/* Create/Edit Modal */}
+      <Dialog open={showForm} onOpenChange={(open) => { setShowForm(open); if (!open) resetForm() }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{editingBundle ? "Edit Bundle Deal" : "New Bundle Deal"}</DialogTitle>
+            <DialogDescription>
+              {editingBundle ? "Update this bundle's products and pricing." : "Combine products into a discounted bundle deal."}
+            </DialogDescription>
+          </DialogHeader>
 
-            <div className="grid gap-4">
+          <div className="grid gap-4">
               <div>
                 <Label htmlFor="name">Bundle Name</Label>
                 <Input
                   id="name"
-                  placeholder="e.g. Gloss & Clip Combo"
+                  placeholder="e.g. Signature Scents Duo"
                   value={bundleName}
                   onChange={(e) => setBundleName(e.target.value)}
                 />
@@ -210,7 +224,7 @@ export function BundlesManager({
                 <Label htmlFor="description">Description</Label>
                 <Textarea
                   id="description"
-                  placeholder="e.g. Get your favorite gloss + matching clip at a special price!"
+                  placeholder="e.g. Get your favorite fragrances together at a special price!"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                 />
@@ -259,33 +273,86 @@ export function BundlesManager({
               </div>
 
               <div>
-                <Label className="mb-3 block">Select Products (min 2)</Label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 max-h-64 overflow-y-auto p-1 scrollbar-thin scrollbar-thumb-muted-foreground/20">
-                  {products.map((product) => (
-                    <button
-                      key={product.id}
+                <Label className="mb-2 block">Select Products (min 2)</Label>
+                <Popover open={productPickerOpen} onOpenChange={setProductPickerOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
                       type="button"
-                      onClick={() => toggleProduct(product.id)}
-                      className={`flex items-center gap-3 p-3 sm:p-2 rounded-lg border text-left transition-all active:scale-[0.98] ${selectedProducts.includes(product.id)
-                        ? "border-primary bg-primary/10"
-                        : "border-border hover:border-primary/50"
-                        }`}
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={productPickerOpen}
+                      className="w-full justify-between font-normal"
                     >
-                      <div
-                        className={`w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-colors ${selectedProducts.includes(product.id)
-                          ? "border-primary bg-primary"
-                          : "border-muted-foreground"
-                          }`}
-                      >
-                        {selectedProducts.includes(product.id) && <Check className="w-3 h-3 text-white" />}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{product.name}</p>
-                        <p className="text-xs text-muted-foreground">KES {product.price.toLocaleString()}</p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
+                      {selectedProducts.length > 0
+                        ? `${selectedProducts.length} product${selectedProducts.length > 1 ? "s" : ""} selected`
+                        : "Search and select products..."}
+                      <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                    <Command>
+                      <CommandInput placeholder="Search products..." />
+                      <CommandList>
+                        <CommandEmpty>No products found.</CommandEmpty>
+                        {products.map((product) => (
+                          <CommandItem
+                            key={product.id}
+                            value={product.name}
+                            onSelect={() => toggleProduct(product.id)}
+                          >
+                            <Check
+                              className={cn(
+                                "h-4 w-4",
+                                selectedProducts.includes(product.id) ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            <span className="flex-1 truncate">{product.name}</span>
+                            <span className="text-xs text-muted-foreground">KES {product.price.toLocaleString()}</span>
+                          </CommandItem>
+                        ))}
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+
+                {selectedProducts.length > 0 && (
+                  <div className="mt-3 space-y-2">
+                    <p className="text-xs font-medium text-muted-foreground">
+                      {selectedProducts.length} selected
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedProducts.map((id) => {
+                        const product = products.find((p) => p.id === id)
+                        if (!product) return null
+                        return (
+                          <div
+                            key={id}
+                            className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-full border border-border bg-muted/50 hover:bg-muted transition-colors"
+                          >
+                            <div className="relative w-6 h-6 rounded-full overflow-hidden bg-background shrink-0 border border-border">
+                              {product.images?.[0] ? (
+                                <Image src={product.images[0]} alt={product.name} fill className="object-cover" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-[10px] font-semibold text-muted-foreground">
+                                  {product.name[0]}
+                                </div>
+                              )}
+                            </div>
+                            <span className="text-xs font-medium max-w-[140px] truncate">{product.name}</span>
+                            <button
+                              type="button"
+                              onClick={() => toggleProduct(id)}
+                              className="rounded-full hover:bg-destructive/10 hover:text-destructive p-0.5 transition-colors"
+                              aria-label={`Remove ${product.name}`}
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {selectedProducts.length >= 2 && (
@@ -346,22 +413,22 @@ export function BundlesManager({
                 </div>
               )}
 
-              <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                <Button
-                  onClick={handleCreate}
-                  disabled={!bundleName || selectedProducts.length < 2 || !bundlePrice || isSubmitting}
-                  className="w-full sm:flex-1 h-11"
-                >
-                  {isSubmitting ? "Saving..." : editingBundle ? "Update Bundle" : "Create Bundle"}
-                </Button>
-                <Button variant="outline" onClick={() => { setShowForm(false); resetForm(); }} className="w-full sm:flex-none h-11">
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+
+          <DialogFooter className="flex flex-col sm:flex-col sm:justify-start gap-2 pt-4 border-t border-border">
+            <Button
+              onClick={handleCreate}
+              disabled={!bundleName || selectedProducts.length < 2 || !bundlePrice || isSubmitting}
+              className="w-full h-11"
+            >
+              {isSubmitting ? "Saving..." : editingBundle ? "Update Bundle" : "Create Bundle"}
+            </Button>
+            <Button variant="outline" onClick={() => { setShowForm(false); resetForm(); }} className="w-full h-11">
+              Cancel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Bundles List */}
       <div className="grid gap-4">

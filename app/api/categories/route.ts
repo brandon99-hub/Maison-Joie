@@ -1,7 +1,9 @@
 import { sql } from '@/lib/db'
 import { NextResponse } from 'next/server'
 
-export const revalidate = 300 // Cache for 5 minutes
+// Always run at request time — never bake a failed/empty DB fetch into a
+// build-time static snapshot (see catch block below).
+export const dynamic = 'force-dynamic'
 
 export async function GET() {
     try {

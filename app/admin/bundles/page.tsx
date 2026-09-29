@@ -1,7 +1,6 @@
 import { sql } from "@/lib/db"
 import type { Bundle, Product } from "@/types/db"
 import { BundlesManager } from "./bundles-manager"
-import { AdminPageHeader } from "@/components/admin/admin-page-header"
 
 export const dynamic = "force-dynamic"
 
@@ -32,10 +31,6 @@ export default async function BundlesPage() {
 
   return (
     <div className="p-6 md:p-8">
-      <AdminPageHeader
-        title="Bundle Deals"
-        description="Create special product bundles and promotional combos to boost sales."
-      />
       <BundlesManager initialBundles={bundles} products={products} />
     </div>
   )

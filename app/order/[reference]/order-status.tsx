@@ -36,10 +36,10 @@ export function OrderStatus({ order }: { order: Order }) {
 
   // Redirect to success when payment confirmed
   useEffect(() => {
-    if (order.mpesa_confirmed && order.gift_card_id) {
+    if (order.mpesa_confirmed) {
       router.push(`/success/${order.reference_code}`)
     }
-  }, [order.mpesa_confirmed, order.gift_card_id, order.reference_code, router])
+  }, [order.mpesa_confirmed, order.reference_code, router])
 
   return (
     <div className="py-8 px-4">
@@ -126,15 +126,6 @@ export function OrderStatus({ order }: { order: Order }) {
             </div>
           </div>
         </div>
-
-        {/* Gift card teaser */}
-        {order.status === "pending" && (
-          <div className="bg-gradient-to-r from-rose-100 to-amber-50 rounded-xl p-4 text-center">
-            <span className="text-2xl">🎁</span>
-            <p className="text-sm font-medium mt-1">Your gift card is waiting to be revealed!</p>
-            <p className="text-xs text-muted-foreground">Once payment is confirmed</p>
-          </div>
-        )}
 
         <div className="mt-6">
           <Button asChild variant="outline" className="w-full bg-transparent">

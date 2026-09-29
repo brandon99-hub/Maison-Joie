@@ -4,7 +4,7 @@ import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
-import { ChevronLeft, Minus, Plus, ShoppingBag, Check, Heart, Share2, Package, Truck } from "lucide-react"
+import { ChevronLeft, Minus, Plus, ShoppingBag, Check, Heart, Share2, ShieldCheck, Truck } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useCart, useWishlist } from "@/providers"
@@ -191,8 +191,8 @@ export function ProductDetails({ product }: { product: Product }) {
             {/* Features Grid */}
             <div className="grid grid-cols-2 gap-3 mb-6">
               <div className="flex items-center gap-2 text-sm bg-primary/5 rounded-lg p-3">
-                <Package className="h-5 w-5 text-primary flex-shrink-0" />
-                <span className="font-medium">Free gift card</span>
+                <ShieldCheck className="h-5 w-5 text-primary flex-shrink-0" />
+                <span className="font-medium">100% Authentic</span>
               </div>
               <div className="flex items-center gap-2 text-sm bg-primary/5 rounded-lg p-3">
                 <Truck className="h-5 w-5 text-primary flex-shrink-0" />

@@ -875,15 +875,6 @@ function CartContent() {
           </div>
         </div>
 
-        {/* Promos */}
-        <div className="bg-gradient-to-br from-rose-500/10 to-amber-500/10 rounded-2xl p-4 mb-8 text-center border border-primary/10 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full -mr-12 -mt-12 transition-transform group-hover:scale-110" />
-          <span className="text-3xl filter drop-shadow-md">🎁</span>
-          <p className="text-sm font-bold mt-2 text-primary">Special Gift Card Included!</p>
-          <p className="text-[10px] text-muted-foreground mt-1"><b>Just ensure to come back</b></p>
-        </div>
-
-
         {/* Main CTA */}
         <Button
           onClick={handleSendOrder}

@@ -44,8 +44,8 @@ export function DesktopHero({ bundles = [] }: DesktopHeroProps) {
                             </span>
 
                             <h1 className="text-5xl lg:text-6xl font-bold leading-tight mb-4">
-                                Shine brighter <br />
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-amber-500">Every Single Day.</span>
+                                Elegance, <br />
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-amber-500">In Every Bottle.</span>
                             </h1>
 
                             <p className="text-lg text-muted-foreground mb-6 max-w-lg leading-relaxed">
@@ -88,17 +88,16 @@ export function DesktopHero({ bundles = [] }: DesktopHeroProps) {
                                 <BundleCarousel bundles={bundles} />
                             ) : (
                                 <>
-                                    {/* Fallback: Main Hero Image */}
-                                    <div className="relative rounded-[2.5rem] overflow-hidden shadow-2xl border-8 border-white">
+                                    {/* Fallback: Brand Showcase */}
+                                    <div className="relative rounded-[2.5rem] overflow-hidden shadow-2xl border-8 border-white bg-gradient-to-br from-rose-100 via-white to-amber-100 flex items-center justify-center h-[600px]">
                                         <Image
-                                            src="/gold-hair-claw-clip.jpg"
-                                            alt="Hero Model"
-                                            width={600}
-                                            height={800}
-                                            className="object-cover w-full h-[600px]"
+                                            src="/logo2.png"
+                                            alt="Maison Joie"
+                                            width={320}
+                                            height={67}
+                                            className="w-2/3 h-auto object-contain opacity-90"
                                             priority
                                         />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-rose-900/20 to-transparent" />
                                     </div>
 
                                     {/* Floating Cards */}
@@ -111,7 +110,7 @@ export function DesktopHero({ bundles = [] }: DesktopHeroProps) {
                                             <div className="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-2xl">✨</div>
                                             <div>
                                                 <p className="font-bold text-gray-900">Premium Quality</p>
-                                                <p className="text-xs text-muted-foreground">Gold-plated & durable materials</p>
+                                                <p className="text-xs text-muted-foreground">Long-lasting, authentic fragrances</p>
                                             </div>
                                         </div>
                                     </motion.div>

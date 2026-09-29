@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Plus, Search, Pencil, Trash2, GripVertical, Tag, Check, X, Loader2, AlertTriangle, FileImage } from "lucide-react"
+import { Plus, Search, Pencil, Trash2, GripVertical, Tag, X, Loader2, AlertTriangle, Upload } from "lucide-react"
 import type { Category } from "@/lib/db"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -20,27 +20,19 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { createCategory, updateCategory, deleteCategory } from "./actions"
 import { toast } from "sonner"
-
-const DEFAULT_CATEGORY_IMAGES = [
-    "/gold-hair-claw-clip.jpg",
-    "/summer-fridays-vanilla-lip-gloss-pink-tube.jpg",
-    "/charms.jpg",
-    "/my pic.jpg",
-    "/cute summer fridays lip gloss key chain charm….jpg",
-    "/i love the new charms.jpg",
-]
 
 export function CategoriesManager({ categories: initialCategories }: { categories: Category[] }) {
     const [categories, setCategories] = useState(initialCategories)
     const [showForm, setShowForm] = useState(false)
     const [editingCategory, setEditingCategory] = useState<Category | null>(null)
     const [loading, setLoading] = useState(false)
+    const [uploadingImage, setUploadingImage] = useState(false)
     const [searchTerm, setSearchTerm] = useState("")
     const [deleteModalOpen, setDeleteModalOpen] = useState(false)
     const [categoryToDelete, setCategoryToDelete] = useState<{ id: number; name: string } | null>(null)
-    const [selectedDefaultImage, setSelectedDefaultImage] = useState("")
 
     // Form State
     const [formData, setFormData] = useState({
@@ -59,7 +51,6 @@ export function CategoriesManager({ categories: initialCategories }: { categorie
             image: "",
             is_active: true
         })
-        setSelectedDefaultImage("")
         setEditingCategory(null)
     }
 
@@ -72,7 +63,6 @@ export function CategoriesManager({ categories: initialCategories }: { categorie
             image: category.image || "",
             is_active: category.is_active
         })
-        setSelectedDefaultImage(category.image || "")
         setShowForm(true)
     }
 
@@ -97,7 +87,18 @@ export function CategoriesManager({ categories: initialCategories }: { categorie
         const file = e.target.files?.[0]
         if (!file) return
 
-        setLoading(true)
+        if (!file.type.startsWith("image/")) {
+            toast.error("Please select an image file")
+            e.target.value = ""
+            return
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error("Image must be under 5MB")
+            e.target.value = ""
+            return
+        }
+
+        setUploadingImage(true)
         const data = new FormData()
         data.append("file", file)
 
@@ -108,13 +109,15 @@ export function CategoriesManager({ categories: initialCategories }: { categorie
                 setFormData(prev => ({ ...prev, image: json.url }))
                 toast.success("Image uploaded")
             } else {
-                toast.error("Failed to upload image")
+                toast.error(json.error || "Failed to upload image")
             }
         } catch (err) {
             console.error(err)
             toast.error("Failed to upload image")
+        } finally {
+            setUploadingImage(false)
+            e.target.value = ""
         }
-        setLoading(false)
     }
 
     const removeImage = () => {
@@ -126,11 +129,10 @@ export function CategoriesManager({ categories: initialCategories }: { categorie
         setLoading(true)
 
         const form = new FormData()
-        const imageToUse = formData.image || selectedDefaultImage
         form.append("name", formData.name)
         form.append("slug", formData.slug)
         form.append("description", formData.description)
-        form.append("image", imageToUse)
+        form.append("image", formData.image)
         if (formData.is_active) form.append("is_active", "on")
 
         let result
@@ -177,161 +179,122 @@ export function CategoriesManager({ categories: initialCategories }: { categorie
         c.slug.toLowerCase().includes(searchTerm.toLowerCase())
     )
 
-    if (showForm) {
-        return (
-            <div className="max-w-2xl mx-auto">
-                <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-bold">{editingCategory ? "Edit Category" : "New Category"}</h2>
-                    <Button variant="ghost" onClick={() => { setShowForm(false); resetForm(); }}>Cancel</Button>
-                </div>
+    return (
+        <div>
+            <Dialog open={showForm} onOpenChange={(open) => { setShowForm(open); if (!open) resetForm() }}>
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle>{editingCategory ? "Edit Category" : "New Category"}</DialogTitle>
+                        <DialogDescription>
+                            {editingCategory ? "Update this category's details." : "Add a new category to organize your catalog."}
+                        </DialogDescription>
+                    </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="bg-card p-6 rounded-xl border border-border shadow-sm space-y-4">
-                        <h3 className="font-semibold flex items-center gap-2"><Tag className="w-4 h-4" /> Category Details</h3>
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        <div className="space-y-4">
+                            <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-1.5"><Tag className="w-3.5 h-3.5" /> Category Details</h3>
 
-                        <div>
-                            <Label>Category Name *</Label>
-                            <Input
-                                value={formData.name}
-                                onChange={e => handleNameChange(e.target.value)}
-                                required
-                                placeholder="e.g. Hair Charms"
-                            />
+                            <div>
+                                <Label>Category Name *</Label>
+                                <Input
+                                    value={formData.name}
+                                    onChange={e => handleNameChange(e.target.value)}
+                                    required
+                                    placeholder="e.g. Eau de Parfum"
+                                />
+                            </div>
+
+                            <div>
+                                <Label>Slug *</Label>
+                                <Input
+                                    value={formData.slug}
+                                    onChange={e => setFormData({ ...formData, slug: e.target.value })}
+                                    required
+                                    placeholder="eau-de-parfum"
+                                />
+                                <p className="text-xs text-muted-foreground mt-1">
+                                    Used in URLs. Auto-generated from name.
+                                </p>
+                            </div>
+
+                            <div>
+                                <Label>Description (Optional)</Label>
+                                <Textarea
+                                    value={formData.description}
+                                    onChange={e => setFormData({ ...formData, description: e.target.value })}
+                                    rows={3}
+                                    placeholder="Describe this category..."
+                                />
+                            </div>
                         </div>
 
-                        <div>
-                            <Label>Slug *</Label>
-                            <Input
-                                value={formData.slug}
-                                onChange={e => setFormData({ ...formData, slug: e.target.value })}
-                                required
-                                placeholder="hair-charm"
-                            />
-                            <p className="text-xs text-muted-foreground mt-1">
-                                Used in URLs. Auto-generated from name.
-                            </p>
-                        </div>
-
-                        <div>
-                            <Label>Description (Optional)</Label>
-                            <Textarea
-                                value={formData.description}
-                                onChange={e => setFormData({ ...formData, description: e.target.value })}
-                                rows={3}
-                                placeholder="Describe this category..."
-                            />
-                        </div>
-
-                        <div>
+                        <div className="space-y-3 pt-6 border-t border-border">
                             <Label>Category Image</Label>
 
-                            {/* Default Image Selection */}
-                            <div className="mt-2 space-y-3">
-                                <p className="text-sm text-muted-foreground">Choose a default image:</p>
-                                <div className="grid grid-cols-4 gap-3">
-                                    {DEFAULT_CATEGORY_IMAGES.map((img) => (
-                                        <button
-                                            key={img}
-                                            type="button"
-                                            onClick={() => {
-                                                setSelectedDefaultImage(img)
-                                                setFormData({ ...formData, image: "" })
-                                            }}
-                                            className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${selectedDefaultImage === img && !formData.image
-                                                ? "border-primary ring-2 ring-primary"
-                                                : "border-border hover:border-primary/50"
-                                                }`}
-                                        >
-                                            <Image src={img} alt="Default category" fill className="object-cover" />
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Custom URL Input */}
-                            <div className="mt-3">
-                                <Label htmlFor="customImage">Or upload custom image:</Label>
-                                <div className="flex gap-2 mt-1">
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        disabled={loading}
-                                        onClick={() => document.getElementById('category-image-upload')?.click()}
-                                        className="flex-1"
-                                    >
-                                        {loading ? (
-                                            <>
-                                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                                Uploading...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <FileImage className="w-4 h-4 mr-2" />
-                                                Upload Image
-                                            </>
-                                        )}
-                                    </Button>
-                                    <input
-                                        id="category-image-upload"
-                                        type="file"
-                                        accept="image/*"
-                                        className="hidden"
-                                        onChange={handleImageUpload}
-                                        disabled={loading}
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Image Preview */}
-                            {(formData.image || selectedDefaultImage) && (
-                                <div className="mt-3 relative w-full h-32 rounded-lg overflow-hidden border border-border">
+                            {formData.image ? (
+                                <div className="relative w-full h-32 rounded-lg overflow-hidden border border-border">
                                     <Image
-                                        src={formData.image || selectedDefaultImage}
+                                        src={formData.image}
                                         alt="Preview"
                                         fill
                                         className="object-cover"
                                     />
-                                    {formData.image && (
-                                        <button
-                                            type="button"
-                                            onClick={removeImage}
-                                            className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-full transition-colors"
-                                        >
-                                            <X className="w-3 h-3" />
-                                        </button>
-                                    )}
+                                    <button
+                                        type="button"
+                                        onClick={removeImage}
+                                        className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white rounded-full p-1.5 transition-colors"
+                                        aria-label="Remove image"
+                                    >
+                                        <X className="w-3.5 h-3.5" />
+                                    </button>
                                 </div>
+                            ) : (
+                                <label className="flex flex-col items-center justify-center w-full h-32 rounded-lg border-2 border-dashed border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50 transition-colors cursor-pointer">
+                                    <div className="text-center p-2">
+                                        {uploadingImage ? (
+                                            <Loader2 className="w-6 h-6 animate-spin mx-auto" />
+                                        ) : (
+                                            <Upload className="w-6 h-6 mx-auto mb-1 text-muted-foreground" />
+                                        )}
+                                        <span className="text-xs text-muted-foreground">Upload photo</span>
+                                    </div>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={handleImageUpload}
+                                        disabled={uploadingImage}
+                                    />
+                                </label>
                             )}
 
-                            <p className="text-xs text-muted-foreground mt-2">
+                            <p className="text-xs text-muted-foreground">
                                 Recommended: 800x400px (16:9 ratio)
                             </p>
                         </div>
 
-                        <div className="flex items-center justify-between pt-4 border-t">
-                            <Label className="text-base">Active Status</Label>
+                        <div className="flex items-center justify-between rounded-lg border border-border px-4 py-3">
+                            <div>
+                                <Label className="text-sm">Active Status</Label>
+                                <p className="text-xs text-muted-foreground">Inactive categories are hidden from the store.</p>
+                            </div>
                             <Switch
                                 checked={formData.is_active}
                                 onCheckedChange={c => setFormData({ ...formData, is_active: c })}
                             />
                         </div>
-                        <p className="text-xs text-muted-foreground">Inactive categories are hidden from the store.</p>
-                    </div>
 
-                    <div className="flex justify-end gap-4">
-                        <Button type="button" variant="outline" onClick={() => { setShowForm(false); resetForm(); }}>Cancel</Button>
-                        <Button type="submit" disabled={loading} className="min-w-[120px]">
-                            {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                            {editingCategory ? "Save Changes" : "Create Category"}
-                        </Button>
-                    </div>
-                </form>
-            </div>
-        )
-    }
+                        <DialogFooter className="flex flex-col sm:flex-col sm:justify-start gap-2 pt-4 border-t border-border">
+                            <Button type="submit" disabled={loading} className="w-full min-w-[120px]">
+                                {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                                {editingCategory ? "Save Changes" : "Create Category"}
+                            </Button>
+                            <Button type="button" variant="outline" className="w-full" onClick={() => { setShowForm(false); resetForm(); }}>Cancel</Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
 
-    return (
-        <div>
             <AdminPageHeader
                 title="Categories"
                 description={`${categories.length} total categories registered`}

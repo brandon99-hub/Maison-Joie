@@ -92,7 +92,6 @@ export const orders = pgTable(
     total_amount: numeric("total_amount", { precision: 10, scale: 2 }).notNull(),
     status: varchar("status", { length: 50 }).default("pending"),
     mpesa_confirmed: boolean("mpesa_confirmed").default(false),
-    gift_card_id: integer("gift_card_id"),
     delivery_method: varchar("delivery_method", { length: 50 }).default("pickup"),
     delivery_fee: numeric("delivery_fee", { precision: 10, scale: 2 }).default("0"),
     pickup_mtaani_location: varchar("pickup_mtaani_location", { length: 255 }),
@@ -116,19 +115,6 @@ export const orders = pgTable(
     index("idx_orders_has_bundle").on(table.has_bundle),
     index("idx_orders_secret_code").on(table.secret_code),
   ]
-)
-
-// 5. Gift Cards Table
-export const giftCards = pgTable(
-  "gift_cards",
-  {
-    id: serial("id").primaryKey(),
-    code: varchar("code", { length: 50 }).notNull().unique("gift_cards_code_key"),
-    value: numeric("value", { precision: 10, scale: 2 }).notNull(),
-    order_id: integer("order_id").references(() => orders.id, { onDelete: "set null" }),
-    is_redeemed: boolean("is_redeemed").default(false),
-    created_at: timestamp("created_at").defaultNow(),
-  }
 )
 
 // 6. Testimonials Table

@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation"
 import { sql, type Testimonial } from "@/lib/db"
 import { TestimonialsManager } from "./testimonials-manager"
-import { AdminPageHeader } from "@/components/admin/admin-page-header"
 import { verifyAdminSession } from "@/lib/admin-auth"
 
 export default async function AdminTestimonialsPage() {
@@ -18,10 +17,6 @@ export default async function AdminTestimonialsPage() {
 
   return (
     <div className="p-6 md:p-8">
-      <AdminPageHeader
-        title="Testimonials"
-        description="Review, approve, and showcase authentic customer reviews and social proof."
-      />
       <TestimonialsManager testimonials={testimonials} />
     </div>
   )

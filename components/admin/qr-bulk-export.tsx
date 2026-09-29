@@ -37,7 +37,7 @@ export function QRBulkExport({ selectedCodes, onClearSelection }: QRBulkExportPr
                     format: [105, 148]
                 })
 
-                // Same Gift Card template as individual export
+                // Same template as individual export
                 const width = 105
                 const height = 148
 
@@ -60,7 +60,7 @@ export function QRBulkExport({ selectedCodes, onClearSelection }: QRBulkExportPr
                 doc.setFont("helvetica", "normal")
                 doc.setFontSize(9)
                 doc.setTextColor(100, 100, 100)
-                doc.text("Hair Clips & Lip Gloss", width / 2, 26, { align: "center" })
+                doc.text("Perfume with Elegance", width / 2, 26, { align: "center" })
 
                 doc.setDrawColor(236, 72, 153)
                 doc.setLineWidth(0.2)
@@ -115,7 +115,7 @@ export function QRBulkExport({ selectedCodes, onClearSelection }: QRBulkExportPr
 
                 // Add PDF to ZIP
                 const pdfBlob = doc.output("blob")
-                zip.file(`GiftCard-${code.code}.pdf`, pdfBlob)
+                zip.file(`SecretCode-${code.code}.pdf`, pdfBlob)
             }
 
             // Generate ZIP file

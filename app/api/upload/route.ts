@@ -1,6 +1,14 @@
-import { writeFile, mkdir } from "fs/promises"
+import { v2 as cloudinary } from "cloudinary"
 import { NextRequest, NextResponse } from "next/server"
-import path from "path"
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+})
+
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"]
+const MAX_SIZE = 5 * 1024 * 1024 // 5MB
 
 export async function POST(request: NextRequest) {
     const data = await request.formData()
@@ -10,26 +18,27 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: false, error: "No file provided" })
     }
 
-    const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
-
-    // Ensure upload directory exists
-    const uploadDir = path.join(process.cwd(), "public/uploads")
-    try {
-        await mkdir(uploadDir, { recursive: true })
-    } catch (e) {
-        console.error("Error creating upload directory:", e)
+    if (!ALLOWED_TYPES.includes(file.type)) {
+        return NextResponse.json({ success: false, error: "File must be a JPEG, PNG, WEBP, or GIF image" })
     }
 
-    // Create unique filename
-    const filename = `${Date.now()}-${file.name.replace(/\s/g, "-")}`
-    const filepath = path.join(uploadDir, filename)
+    if (file.size > MAX_SIZE) {
+        return NextResponse.json({ success: false, error: "Image must be under 5MB" })
+    }
 
     try {
-        await writeFile(filepath, buffer)
-        return NextResponse.json({ success: true, url: `/uploads/${filename}` })
+        const bytes = await file.arrayBuffer()
+        const base64 = Buffer.from(bytes).toString("base64")
+        const dataUri = `data:${file.type};base64,${base64}`
+
+        const result = await cloudinary.uploader.upload(dataUri, {
+            folder: "maison-joie",
+            resource_type: "image",
+        })
+
+        return NextResponse.json({ success: true, url: result.secure_url })
     } catch (error) {
-        console.error("Error saving file:", error)
-        return NextResponse.json({ success: false, error: "Failed to save file" })
+        console.error("Error uploading file:", error)
+        return NextResponse.json({ success: false, error: "Failed to upload file" })
     }
 }

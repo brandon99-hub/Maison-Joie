@@ -5,11 +5,14 @@ import type React from "react"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
-import { Plus, Trash2, Loader2, Pencil } from "lucide-react"
+import { Plus, Trash2, Loader2, Pencil, Upload, X } from "lucide-react"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
+import { AdminPageHeader } from "@/components/admin/admin-page-header"
 import type { Testimonial } from "@/lib/db"
 import { addTestimonial, deleteTestimonial, updateTestimonial, toggleApproval } from "./actions"
 
@@ -17,9 +20,46 @@ export function TestimonialsManager({ testimonials }: { testimonials: Testimonia
   const router = useRouter()
   const [showForm, setShowForm] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [uploadingImage, setUploadingImage] = useState(false)
   const [deleting, setDeleting] = useState<number | null>(null)
   const [imageUrl, setImageUrl] = useState("")
   const [editingTestimonial, setEditingTestimonial] = useState<Testimonial | null>(null)
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file")
+      e.target.value = ""
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be under 5MB")
+      e.target.value = ""
+      return
+    }
+
+    setUploadingImage(true)
+    const formData = new FormData()
+    formData.append("file", file)
+
+    try {
+      const res = await fetch("/api/upload", { method: "POST", body: formData })
+      const data = await res.json()
+      if (data.success) {
+        setImageUrl(data.url)
+      } else {
+        toast.error(data.error || "Failed to upload image")
+      }
+    } catch (err) {
+      console.error(err)
+      toast.error("Failed to upload image")
+    } finally {
+      setUploadingImage(false)
+      e.target.value = ""
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -62,21 +102,31 @@ export function TestimonialsManager({ testimonials }: { testimonials: Testimonia
 
   return (
     <div>
-      {/* Add button */}
-      {/* Add button */}
-      <Button onClick={() => {
-        setEditingTestimonial(null)
-        setImageUrl("")
-        setShowForm(!showForm)
-      }} className="mb-6 bg-primary hover:bg-primary/90">
-        <Plus className="w-4 h-4 mr-2" /> {showForm ? "Close Form" : "Add Testimonial"}
-      </Button>
+      <AdminPageHeader
+        title="Testimonials"
+        description="Review, approve, and showcase authentic customer reviews and social proof."
+        actions={
+          <Button onClick={() => {
+            setEditingTestimonial(null)
+            setImageUrl("")
+            setShowForm(true)
+          }} className="bg-primary hover:bg-primary/90">
+            <Plus className="w-4 h-4 mr-2" /> Add Testimonial
+          </Button>
+        }
+      />
 
-      {/* Add form */}
-      {/* Add form */}
-      {showForm && (
-        <form onSubmit={handleSubmit} className="bg-card border border-border rounded-xl p-4 mb-6 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Add/Edit Modal */}
+      <Dialog open={showForm} onOpenChange={(open) => { if (!open) handleCancel(); else setShowForm(true) }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{editingTestimonial ? "Edit Testimonial" : "New Testimonial"}</DialogTitle>
+            <DialogDescription>
+              {editingTestimonial ? "Update this customer testimonial." : "Add a customer testimonial to showcase on the storefront."}
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <Label htmlFor="username">Username</Label>
               <Input
@@ -88,78 +138,65 @@ export function TestimonialsManager({ testimonials }: { testimonials: Testimonia
                 defaultValue={editingTestimonial?.username || ""}
               />
             </div>
-            <div>
-              <Label htmlFor="profile_image">Profile Image</Label>
-              <div className="flex gap-2 mt-1">
-                <Input id="profile_image" name="profile_image" type="hidden" value={imageUrl} />
-                <Input
-                  type="file"
-                  accept="image/*"
-                  className="text-xs sm:text-sm"
-                  onChange={async (e) => {
-                    const file = e.target.files?.[0]
-                    if (!file) return
 
-                    const formData = new FormData()
-                    formData.append("file", file)
+            <div className="space-y-3">
+              <Label>Profile Image</Label>
+              <Input id="profile_image" name="profile_image" type="hidden" value={imageUrl} />
 
-                    const res = await fetch("/api/upload", {
-                      method: "POST",
-                      body: formData,
-                    })
-
-                    const data = await res.json()
-                    if (data.success) {
-                      setImageUrl(data.url)
-                    }
-                  }}
-                />
-              </div>
-              {imageUrl && (
-                <div className="mt-2 relative w-12 h-12 rounded-full overflow-hidden border">
+              {imageUrl ? (
+                <div className="relative w-20 h-20 rounded-full overflow-hidden border border-border">
                   <Image src={imageUrl} alt="Preview" fill className="object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => setImageUrl("")}
+                    className="absolute top-0 right-0 bg-black/60 hover:bg-black/80 text-white rounded-full p-1 transition-colors"
+                    aria-label="Remove image"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
                 </div>
+              ) : (
+                <label className="flex flex-col items-center justify-center w-20 h-20 rounded-full border-2 border-dashed border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50 transition-colors cursor-pointer">
+                  {uploadingImage ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <Upload className="w-5 h-5 text-muted-foreground" />
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImageUpload}
+                    disabled={uploadingImage}
+                  />
+                </label>
               )}
             </div>
-          </div>
 
-          <div>
-            <Label htmlFor="message">Message</Label>
-            <Textarea
-              id="message"
-              name="message"
-              placeholder="What they said..."
-              required
-              className="mt-1"
-              rows={3}
-              defaultValue={editingTestimonial?.message || ""}
-            />
-          </div>
+            <div>
+              <Label htmlFor="message">Message</Label>
+              <Textarea
+                id="message"
+                name="message"
+                placeholder="What they said..."
+                required
+                className="mt-1"
+                rows={3}
+                defaultValue={editingTestimonial?.message || ""}
+              />
+            </div>
 
-          <div>
-            <Label htmlFor="emoji_reactions">Emoji Reactions (comma-separated)</Label>
-            <Input
-              id="emoji_reactions"
-              name="emoji_reactions"
-              placeholder="fire,heart,sparkles"
-              className="mt-1"
-              defaultValue={editingTestimonial?.emoji_reactions || ""}
-            />
-            <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
-              Available: fire, heart, sparkles, crying, gift, laughing, hundred, skull, money, heart_eyes
-            </p>
-          </div>
-
-          <div className="flex gap-2 pt-2">
-            <Button type="submit" disabled={loading} className="flex-1 sm:flex-none bg-primary hover:bg-primary/90">
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : (editingTestimonial ? "Update" : "Add")}
-            </Button>
-            <Button type="button" variant="outline" onClick={handleCancel} className="flex-1 sm:flex-none bg-transparent hover:bg-muted">
-              Cancel
-            </Button>
-          </div>
-        </form>
-      )}
+            <DialogFooter className="flex flex-col sm:flex-col sm:justify-start gap-2 pt-4 border-t border-border">
+              <Button type="submit" disabled={loading || uploadingImage} className="w-full bg-primary hover:bg-primary/90">
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : (editingTestimonial ? "Update" : "Add")}
+              </Button>
+              <Button type="button" variant="outline" onClick={handleCancel} className="w-full bg-transparent hover:bg-muted">
+                Cancel
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       {/* Testimonials list */}
       <div className="space-y-4">

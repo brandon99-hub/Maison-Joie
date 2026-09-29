@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Plus, Search, Pencil, Trash2, Package, Tag, Layers, FileImage, Check, X, Loader2 } from "lucide-react"
+import { Plus, Search, Pencil, Trash2, Package, Tag, Layers, FileImage, X, Loader2, Upload } from "lucide-react"
 import type { Product, Category } from "@/lib/db"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -19,32 +19,19 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import Image from "next/image"
 import { createProduct, updateProduct, deleteProduct, toggleProductStatus } from "./actions"
 import { toast } from "sonner"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-
-const DEFAULT_PRODUCT_IMAGES = [
-    "/gold-hair-claw-clip.jpg",
-    "/summer-fridays-vanilla-lip-gloss-pink-tube.jpg",
-    "/charms.jpg",
-    "/my pic.jpg",
-    "/cute summer fridays lip gloss key chain charm….jpg",
-    "/i love the new charms.jpg",
-    "/Keep your lippie with you wherever you go by….jpg",
-    "/pearl-hair-pins-set.jpg",
-    "/colorful-butterfly-hair-clips.jpg",
-    "/summer-fridays-cherry-lip-gloss.jpg",
-    "/satin-scrunchies-pink-brown-beige.jpg",
-]
 
 export function ProductsManager({ products: initialProducts, categories }: { products: Product[]; categories: Category[] }) {
     const [products, setProducts] = useState(initialProducts)
     const [showForm, setShowForm] = useState(false)
     const [editingProduct, setEditingProduct] = useState<Product | null>(null)
     const [loading, setLoading] = useState(false)
+    const [uploadingImage, setUploadingImage] = useState(false)
     const [searchTerm, setSearchTerm] = useState("")
-    const [selectedDefaultImage, setSelectedDefaultImage] = useState("")
     const [deleteProductId, setDeleteProductId] = useState<number | null>(null)
 
     // Form State
@@ -70,7 +57,6 @@ export function ProductsManager({ products: initialProducts, categories }: { pro
             is_active: true,
             is_secret: false
         })
-        setSelectedDefaultImage("")
         setEditingProduct(null)
     }
 
@@ -86,7 +72,6 @@ export function ProductsManager({ products: initialProducts, categories }: { pro
             is_active: product.is_active,
             is_secret: product.is_secret || false
         })
-        setSelectedDefaultImage("")
         setShowForm(true)
     }
 
@@ -94,11 +79,21 @@ export function ProductsManager({ products: initialProducts, categories }: { pro
         const files = e.target.files
         if (!files || files.length === 0) return
 
-        setLoading(true)
+        setUploadingImage(true)
         const newImages = [...formData.images]
 
         for (let i = 0; i < files.length; i++) {
             const file = files[i]
+
+            if (!file.type.startsWith("image/")) {
+                toast.error(`${file.name} is not an image file`)
+                continue
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                toast.error(`${file.name} is over 5MB`)
+                continue
+            }
+
             const data = new FormData()
             data.append("file", file)
 
@@ -107,15 +102,18 @@ export function ProductsManager({ products: initialProducts, categories }: { pro
                 const json = await res.json()
                 if (json.success) {
                     newImages.push(json.url)
+                } else {
+                    toast.error(json.error || `Failed to upload ${file.name}`)
                 }
             } catch (err) {
                 console.error(err)
-                toast.error("Failed to upload image")
+                toast.error(`Failed to upload ${file.name}`)
             }
         }
 
         setFormData(prev => ({ ...prev, images: newImages }))
-        setLoading(false)
+        setUploadingImage(false)
+        e.target.value = ""
     }
 
     const removeImage = (index: number) => {
@@ -177,179 +175,152 @@ export function ProductsManager({ products: initialProducts, categories }: { pro
         p.category.toLowerCase().includes(searchTerm.toLowerCase())
     )
 
-    if (showForm) {
-        return (
-            <div className="max-w-4xl mx-auto">
-                <div className="flex items-center justify-between mb-4 sm:mb-6">
-                    <h2 className="text-lg sm:text-xl font-bold">{editingProduct ? "Edit Product" : "New Product"}</h2>
-                    <Button variant="ghost" onClick={() => { setShowForm(false); resetForm(); }} className="min-h-[44px]">Cancel</Button>
-                </div>
+    return (
+        <div>
+            <Dialog open={showForm} onOpenChange={(open) => { setShowForm(open); if (!open) resetForm() }}>
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle>{editingProduct ? "Edit Product" : "New Product"}</DialogTitle>
+                        <DialogDescription>
+                            {editingProduct ? "Update this product's details, pricing, and images." : "Add a new product to your catalog."}
+                        </DialogDescription>
+                    </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
-                    <div className="grid gap-6 sm:gap-8 lg:grid-cols-[2fr_1fr]">
-                        {/* Left Column: Details */}
-                        <div className="space-y-4 sm:space-y-6">
-                            <div className="bg-card p-6 rounded-xl border border-border shadow-sm space-y-4">
-                                <h3 className="font-semibold flex items-center gap-2"><Tag className="w-4 h-4" /> Basic Info</h3>
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        <div className="space-y-4">
+                            <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-1.5"><Tag className="w-3.5 h-3.5" /> Basic Info</h3>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <Label>Product Name</Label>
                                     <Input
                                         value={formData.name}
                                         onChange={e => setFormData({ ...formData, name: e.target.value })}
                                         required
-                                        placeholder="e.g. Midnight Sparkle Lip Gloss"
+                                        placeholder="e.g. Midnight Bloom"
                                     />
                                 </div>
                                 <div>
-                                    <Label>Description</Label>
-                                    <Textarea
-                                        value={formData.description}
-                                        onChange={e => setFormData({ ...formData, description: e.target.value })}
-                                        required
-                                        rows={5}
-                                        placeholder="Describe your product..."
-                                    />
+                                    <Label className="flex items-center gap-1"><Layers className="w-3.5 h-3.5" /> Category</Label>
+                                    <Select
+                                        value={formData.category}
+                                        onValueChange={(value) => setFormData({ ...formData, category: value })}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select category" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {categories.map(cat => (
+                                                <SelectItem key={cat.id} value={cat.slug}>
+                                                    {cat.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                             </div>
+                            <div>
+                                <Label>Description</Label>
+                                <Textarea
+                                    value={formData.description}
+                                    onChange={e => setFormData({ ...formData, description: e.target.value })}
+                                    required
+                                    rows={4}
+                                    placeholder="Describe your product..."
+                                />
+                            </div>
+                        </div>
 
-                            <div className="bg-card p-6 rounded-xl border border-border shadow-sm space-y-4">
-                                <h3 className="font-semibold flex items-center gap-2"><Package className="w-4 h-4" /> Inventory & Pricing</h3>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <Label>Price (KES)</Label>
-                                        <Input
-                                            type="number"
-                                            value={formData.price}
-                                            onChange={e => setFormData({ ...formData, price: e.target.value })}
-                                            required
-                                            min="0"
-                                        />
-                                    </div>
-                                    <div>
-                                        <Label>Stock Quantity</Label>
-                                        <Input
-                                            type="number"
-                                            value={formData.stock_quantity}
-                                            onChange={e => setFormData({ ...formData, stock_quantity: e.target.value })}
-                                            required
-                                            min="0"
-                                        />
-                                    </div>
+                        <div className="space-y-4 pt-6 border-t border-border">
+                            <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-1.5"><Package className="w-3.5 h-3.5" /> Inventory & Pricing</h3>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <Label>Price (KES)</Label>
+                                    <Input
+                                        type="number"
+                                        value={formData.price}
+                                        onChange={e => setFormData({ ...formData, price: e.target.value })}
+                                        required
+                                        min="0"
+                                    />
+                                </div>
+                                <div>
+                                    <Label>Stock Quantity</Label>
+                                    <Input
+                                        type="number"
+                                        value={formData.stock_quantity}
+                                        onChange={e => setFormData({ ...formData, stock_quantity: e.target.value })}
+                                        required
+                                        min="0"
+                                    />
                                 </div>
                             </div>
                         </div>
 
-                        {/* Right Column: Organization & Images */}
-                        <div className="space-y-6">
-                            <div className="bg-card p-6 rounded-xl border border-border shadow-sm space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <Label className="text-base">Active Status</Label>
+                        <div className="space-y-4 pt-6 border-t border-border">
+                            <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Status</h3>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="flex items-center justify-between rounded-lg border border-border px-4 py-3">
+                                    <div>
+                                        <Label className="text-sm">Active</Label>
+                                        <p className="text-xs text-muted-foreground">Hidden from store when off.</p>
+                                    </div>
                                     <Switch
                                         checked={formData.is_active}
                                         onCheckedChange={c => setFormData({ ...formData, is_active: c })}
                                     />
                                 </div>
-                                <p className="text-xs text-muted-foreground">Inactive products are hidden from the store.</p>
-                            </div>
-
-                            <div className="bg-card p-6 rounded-xl border border-border shadow-sm space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <Label className="text-base">🔒 Secret Product</Label>
+                                <div className="flex items-center justify-between rounded-lg border border-border px-4 py-3">
+                                    <div>
+                                        <Label className="text-sm">🔒 Secret</Label>
+                                        <p className="text-xs text-muted-foreground">Only visible via QR code.</p>
+                                    </div>
                                     <Switch
                                         checked={formData.is_secret}
                                         onCheckedChange={c => setFormData({ ...formData, is_secret: c })}
                                     />
                                 </div>
-                                <p className="text-xs text-muted-foreground">Secret products are only visible via QR code and get automatic discount.</p>
-                            </div>
-
-                            <div className="bg-card p-6 rounded-xl border border-border shadow-sm space-y-4">
-                                <h3 className="font-semibold flex items-center gap-2"><Layers className="w-4 h-4" /> Category</h3>
-                                <Select
-                                    value={formData.category}
-                                    onValueChange={(value) => setFormData({ ...formData, category: value })}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select category" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {categories.map(cat => (
-                                            <SelectItem key={cat.id} value={cat.slug}>
-                                                {cat.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="bg-card p-6 rounded-xl border border-border shadow-sm space-y-4">
-                                <h3 className="font-semibold flex items-center gap-2"><FileImage className="w-4 h-4" /> Media</h3>
-
-                                {/* Default Image Selection */}
-                                <div>
-                                    <p className="text-sm text-muted-foreground mb-2">Choose from default images:</p>
-                                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-48 overflow-y-auto">
-                                        {DEFAULT_PRODUCT_IMAGES.map((img) => (
-                                            <button
-                                                key={img}
-                                                type="button"
-                                                onClick={() => {
-                                                    setSelectedDefaultImage(img)
-                                                    setFormData({ ...formData, images: [...formData.images, img] })
-                                                }}
-                                                className="relative aspect-square rounded-lg overflow-hidden border-2 transition-all hover:border-primary/50 active:scale-95"
-                                            >
-                                                <Image src={img} alt="Default product" fill className="object-cover" />
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* Current Images */}
-                                <div>
-                                    <p className="text-sm font-medium mb-2">Selected images:</p>
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                                        {formData.images.map((img, idx) => (
-                                            <div key={idx} className="relative aspect-square rounded-md overflow-hidden border">
-                                                <Image src={img} alt="Product" fill className="object-cover" />
-                                                <button
-                                                    type="button"
-                                                    onClick={() => removeImage(idx)}
-                                                    className="absolute top-1 right-1 bg-black/50 hover:bg-red-500 text-white p-1.5 rounded-full transition-colors active:scale-95"
-                                                    style={{ minWidth: '28px', minHeight: '28px' }}
-                                                >
-                                                    <X className="w-3 h-3" />
-                                                </button>
-                                            </div>
-                                        ))}
-                                        <label className="flex flex-col items-center justify-center aspect-square rounded-md border-2 border-dashed border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50 transition-colors cursor-pointer active:scale-95">
-                                            <div className="text-center p-2">
-                                                {loading ? <Loader2 className="w-6 h-6 animate-spin mx-auto" /> : <Plus className="w-6 h-6 mx-auto mb-1 text-muted-foreground" />}
-                                                <span className="text-xs text-muted-foreground">Upload</span>
-                                            </div>
-                                            <input type="file" accept="image/*" multiple className="hidden" onChange={handleImageUpload} disabled={loading} />
-                                        </label>
-                                    </div>
-                                    <p className="text-xs text-muted-foreground mt-2">First image will be the cover.</p>
-                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 sm:gap-4 pt-4 border-t sticky bottom-0 bg-background pb-safe-area-pb">
-                        <Button type="button" variant="outline" onClick={() => { setShowForm(false); resetForm(); }} className="min-h-[44px]">Cancel</Button>
-                        <Button type="submit" disabled={loading} className="min-w-[120px] min-h-[44px]">
-                            {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                            {editingProduct ? "Save Changes" : "Create Product"}
-                        </Button>
-                    </div>
-                </form>
-            </div>
-        )
-    }
+                        <div className="space-y-4 pt-6 border-t border-border">
+                            <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-1.5"><FileImage className="w-3.5 h-3.5" /> Media</h3>
 
-    return (
-        <div>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                {formData.images.map((img, idx) => (
+                                    <div key={idx} className="relative aspect-square rounded-md overflow-hidden border">
+                                        <Image src={img} alt="Product" fill className="object-cover" />
+                                        <button
+                                            type="button"
+                                            onClick={() => removeImage(idx)}
+                                            className="absolute top-1 right-1 bg-black/50 hover:bg-red-500 text-white p-1.5 rounded-full transition-colors active:scale-95"
+                                            style={{ minWidth: '28px', minHeight: '28px' }}
+                                        >
+                                            <X className="w-3 h-3" />
+                                        </button>
+                                    </div>
+                                ))}
+                                <label className="flex flex-col items-center justify-center aspect-square rounded-md border-2 border-dashed border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50 transition-colors cursor-pointer active:scale-95">
+                                    <div className="text-center p-2">
+                                        {uploadingImage ? <Loader2 className="w-6 h-6 animate-spin mx-auto" /> : <Upload className="w-6 h-6 mx-auto mb-1 text-muted-foreground" />}
+                                        <span className="text-xs text-muted-foreground">Upload</span>
+                                    </div>
+                                    <input type="file" accept="image/*" multiple className="hidden" onChange={handleImageUpload} disabled={uploadingImage} />
+                                </label>
+                            </div>
+                            <p className="text-xs text-muted-foreground">First image will be the cover.</p>
+                        </div>
+
+                        <DialogFooter className="flex flex-col sm:flex-col sm:justify-start gap-2 pt-4 border-t border-border">
+                            <Button type="submit" disabled={loading || uploadingImage} className="w-full min-h-[44px]">
+                                {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                                {editingProduct ? "Save Changes" : "Create Product"}
+                            </Button>
+                            <Button type="button" variant="outline" className="w-full min-h-[44px]" onClick={() => { setShowForm(false); resetForm(); }}>Cancel</Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
+
             <AdminPageHeader
                 title="Products"
                 description={`${products.length} items in inventory`}

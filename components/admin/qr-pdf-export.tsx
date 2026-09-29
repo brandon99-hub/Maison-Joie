@@ -21,10 +21,10 @@ interface QRCodePDFExporterProps {
 export function QRCodePDFExporter({ code, onPreview }: QRCodePDFExporterProps) {
     const [loading, setLoading] = useState(false)
 
-    const generateGiftCardPDF = () => {
+    const generateSecretCodePDF = () => {
         if (!code.qrCodeData) return null
 
-        // Gift Card Style (105mm x 148mm - A6)
+        // Secret Code Card Style (105mm x 148mm - A6)
         const doc = new jsPDF({
             orientation: "portrait",
             unit: "mm",
@@ -57,14 +57,14 @@ export function QRCodePDFExporter({ code, onPreview }: QRCodePDFExporterProps) {
         doc.setFont("helvetica", "normal")
         doc.setFontSize(9)
         doc.setTextColor(100, 100, 100)
-        doc.text("Hair Clips & Lip Gloss", width / 2, 26, { align: "center" })
+        doc.text("Perfume with Elegance", width / 2, 26, { align: "center" })
 
         // Decorative line
         doc.setDrawColor(236, 72, 153)
         doc.setLineWidth(0.2)
         doc.line(25, 30, 80, 30)
 
-        // -- Gift Card Title --
+        // -- Reward Title --
         doc.setFont("helvetica", "bold")
         doc.setFontSize(14)
         doc.setTextColor(236, 72, 153)
@@ -128,13 +128,13 @@ export function QRCodePDFExporter({ code, onPreview }: QRCodePDFExporterProps) {
         setLoading(true)
 
         try {
-            const doc = generateGiftCardPDF()
+            const doc = generateSecretCodePDF()
             if (!doc) {
                 toast.error("Failed to generate PDF")
                 return
             }
 
-            doc.save(`GiftCard-${code.code}.pdf`)
+            doc.save(`SecretCode-${code.code}.pdf`)
 
             // Mark as exported in DB
             await markAsExported(code.id)

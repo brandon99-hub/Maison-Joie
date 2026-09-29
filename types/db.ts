@@ -29,7 +29,6 @@ export type Order = {
   total_amount: number
   status: "pending" | "paid" | "packed" | "collected"
   mpesa_confirmed: boolean
-  gift_card_id: number | null
   delivery_method?: "pickup" | "pickup_mtaani"
   delivery_fee?: number
   pickup_mtaani_location?: string | null
@@ -45,15 +44,6 @@ export type Order = {
   estimated_delivery?: string | null
   created_at: string
   updated_at: string
-}
-
-export type GiftCard = {
-  id: number
-  code: string
-  value: number
-  order_id: number | null
-  is_redeemed: boolean
-  created_at: string
 }
 
 export type Testimonial = {
