@@ -1,14 +1,16 @@
 "use client"
 
 import { useState } from "react"
-import { Plus, Search, Pencil, Trash2, Package, Tag, Layers, FileImage, X, Loader2, Upload } from "lucide-react"
+import { Plus, Search, Pencil, Trash2, Package, Tag, Layers, FileImage, X, Loader2, Upload, LayoutGrid, List } from "lucide-react"
 import type { Product, Category } from "@/lib/db"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table"
 import { AdminPageHeader } from "@/components/admin/admin-page-header"
+import { cn } from "@/lib/utils"
 import {
     AlertDialog,
     AlertDialogAction,
@@ -33,6 +35,7 @@ export function ProductsManager({ products: initialProducts, categories }: { pro
     const [uploadingImage, setUploadingImage] = useState(false)
     const [searchTerm, setSearchTerm] = useState("")
     const [deleteProductId, setDeleteProductId] = useState<number | null>(null)
+    const [viewMode, setViewMode] = useState<"grid" | "table">("grid")
 
     // Form State
     const [formData, setFormData] = useState({
@@ -259,20 +262,30 @@ export function ProductsManager({ products: initialProducts, categories }: { pro
                         <div className="space-y-4 pt-6 border-t border-border">
                             <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Status</h3>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div className="flex items-center justify-between rounded-lg border border-border px-4 py-3">
+                                <div className={cn(
+                                    "flex items-center justify-between rounded-lg border px-4 py-3 transition-colors",
+                                    formData.is_active ? "border-primary/40 bg-primary/5" : "border-border bg-muted/30"
+                                )}>
                                     <div>
                                         <Label className="text-sm">Active</Label>
-                                        <p className="text-xs text-muted-foreground">Hidden from store when off.</p>
+                                        <p className={cn("text-xs", formData.is_active ? "text-primary" : "text-muted-foreground")}>
+                                            {formData.is_active ? "Visible in store" : "Hidden from store"}
+                                        </p>
                                     </div>
                                     <Switch
                                         checked={formData.is_active}
                                         onCheckedChange={c => setFormData({ ...formData, is_active: c })}
                                     />
                                 </div>
-                                <div className="flex items-center justify-between rounded-lg border border-border px-4 py-3">
+                                <div className={cn(
+                                    "flex items-center justify-between rounded-lg border px-4 py-3 transition-colors",
+                                    formData.is_secret ? "border-amber-400/50 bg-amber-50" : "border-border bg-muted/30"
+                                )}>
                                     <div>
                                         <Label className="text-sm">🔒 Secret</Label>
-                                        <p className="text-xs text-muted-foreground">Only visible via QR code.</p>
+                                        <p className={cn("text-xs", formData.is_secret ? "text-amber-700 font-medium" : "text-muted-foreground")}>
+                                            {formData.is_secret ? "QR code only" : "Normal product"}
+                                        </p>
                                     </div>
                                     <Switch
                                         checked={formData.is_secret}
@@ -325,9 +338,31 @@ export function ProductsManager({ products: initialProducts, categories }: { pro
                 title="Products"
                 description={`${products.length} items in inventory`}
                 actions={
-                    <Button onClick={() => setShowForm(true)} className="bg-primary hover:bg-primary/90 text-primary-foreground min-h-[44px]">
-                        <Plus className="w-4 h-4 mr-2" /> Add Product
-                    </Button>
+                    <>
+                        <div className="flex items-center gap-1 rounded-lg border border-border p-1">
+                            <Button
+                                size="icon"
+                                variant={viewMode === "grid" ? "secondary" : "ghost"}
+                                className="h-8 w-8"
+                                onClick={() => setViewMode("grid")}
+                                aria-label="Grid view"
+                            >
+                                <LayoutGrid className="w-4 h-4" />
+                            </Button>
+                            <Button
+                                size="icon"
+                                variant={viewMode === "table" ? "secondary" : "ghost"}
+                                className="h-8 w-8"
+                                onClick={() => setViewMode("table")}
+                                aria-label="Table view"
+                            >
+                                <List className="w-4 h-4" />
+                            </Button>
+                        </div>
+                        <Button onClick={() => setShowForm(true)} className="bg-primary hover:bg-primary/90 text-primary-foreground min-h-[44px]">
+                            <Plus className="w-4 h-4 mr-2" /> Add Product
+                        </Button>
+                    </>
                 }
             />
 
@@ -341,57 +376,118 @@ export function ProductsManager({ products: initialProducts, categories }: { pro
                 />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredProducts.map(product => (
-                    <div key={product.id} className={`bg-card group border rounded-xl overflow-hidden transition-all hover:shadow-md ${!product.is_active ? 'opacity-60 grayscale' : ''}`}>
-                        <div className="relative aspect-[4/3] bg-muted">
-                            {product.images[0] ? (
-                                <Image src={product.images[0]} alt={product.name} fill className="object-cover" />
-                            ) : (
-                                <div className="flex items-center justify-center h-full text-muted-foreground">
-                                    <FileImage className="w-8 h-8 opacity-20" />
+            {viewMode === "grid" ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {filteredProducts.map(product => (
+                        <div key={product.id} className={`bg-card group border rounded-xl overflow-hidden transition-all hover:shadow-md ${!product.is_active ? 'opacity-60 grayscale' : ''}`}>
+                            <div className="relative aspect-[4/3] bg-muted">
+                                {product.images[0] ? (
+                                    <Image src={product.images[0]} alt={product.name} fill className="object-cover" />
+                                ) : (
+                                    <div className="flex items-center justify-center h-full text-muted-foreground">
+                                        <FileImage className="w-8 h-8 opacity-20" />
+                                    </div>
+                                )}
+                                {!product.is_active && (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black/10">
+                                        <span className="bg-black/70 text-white text-xs px-2 py-1 rounded">Inactive</span>
+                                    </div>
+                                )}
+                                {product.is_secret && (
+                                    <div className="absolute top-2 right-2">
+                                        <span className="bg-rose-500 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                                            🔒 SECRET
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="p-4">
+                                <div className="mb-2">
+                                    <h3 className="font-semibold">{product.name}</h3>
+                                    <div className="flex items-center justify-between mt-1 gap-2">
+                                        <p className="text-xs text-muted-foreground truncate">{product.category}</p>
+                                        <p className="font-bold text-primary whitespace-nowrap">KSh {product.price}</p>
+                                    </div>
                                 </div>
-                            )}
-                            {!product.is_active && (
-                                <div className="absolute inset-0 flex items-center justify-center bg-black/10">
-                                    <span className="bg-black/70 text-white text-xs px-2 py-1 rounded">Inactive</span>
+
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+                                    <Package className="w-3 h-3" />
+                                    <span>{product.stock_quantity} in stock</span>
                                 </div>
-                            )}
-                            {product.is_secret && (
-                                <div className="absolute top-2 right-2">
-                                    <span className="bg-rose-500 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
-                                        🔒 SECRET
-                                    </span>
+
+                                <div className="flex items-center gap-2 pt-3 border-t">
+                                    <Button variant="outline" size="sm" className="flex-1 min-h-[44px]" onClick={() => handleEdit(product)}>
+                                        <Pencil className="w-3 h-3 mr-2" /> Edit
+                                    </Button>
+                                    <Button variant="destructive" size="icon" className="min-w-[44px] min-h-[44px]" onClick={() => setDeleteProductId(product.id)}>
+                                        <Trash2 className="w-3 h-3" />
+                                    </Button>
                                 </div>
-                            )}
+                            </div>
                         </div>
-
-                        <div className="p-4">
-                            <div className="flex items-start justify-between gap-2 mb-2">
-                                <div>
-                                    <h3 className="font-semibold truncate">{product.name}</h3>
-                                    <p className="text-xs text-muted-foreground">{product.category}</p>
-                                </div>
-                                <p className="font-bold text-primary">KSh {product.price}</p>
-                            </div>
-
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-                                <Package className="w-3 h-3" />
-                                <span>{product.stock_quantity} in stock</span>
-                            </div>
-
-                            <div className="flex items-center gap-2 pt-3 border-t">
-                                <Button variant="outline" size="sm" className="flex-1 min-h-[44px]" onClick={() => handleEdit(product)}>
-                                    <Pencil className="w-3 h-3 mr-2" /> Edit
-                                </Button>
-                                <Button variant="destructive" size="icon" className="min-w-[44px] min-h-[44px]" onClick={() => setDeleteProductId(product.id)}>
-                                    <Trash2 className="w-3 h-3" />
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
+                    ))}
+                </div>
+            ) : (
+                <div className="rounded-lg border border-border overflow-hidden">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="w-16">Image</TableHead>
+                                <TableHead>Name</TableHead>
+                                <TableHead>Category</TableHead>
+                                <TableHead>Price</TableHead>
+                                <TableHead>Stock</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {filteredProducts.map(product => (
+                                <TableRow key={product.id} className={!product.is_active ? "opacity-60" : ""}>
+                                    <TableCell>
+                                        <div className="relative w-10 h-10 rounded-md overflow-hidden bg-muted shrink-0">
+                                            {product.images[0] ? (
+                                                <Image src={product.images[0]} alt={product.name} fill className="object-cover" />
+                                            ) : (
+                                                <div className="flex items-center justify-center h-full text-muted-foreground">
+                                                    <FileImage className="w-4 h-4 opacity-20" />
+                                                </div>
+                                            )}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="font-medium whitespace-normal max-w-xs">{product.name}</TableCell>
+                                    <TableCell className="text-muted-foreground">{product.category}</TableCell>
+                                    <TableCell className="font-semibold text-primary">KSh {product.price}</TableCell>
+                                    <TableCell>{product.stock_quantity}</TableCell>
+                                    <TableCell>
+                                        <div className="flex flex-wrap gap-1">
+                                            {product.is_active ? (
+                                                <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700">Active</span>
+                                            ) : (
+                                                <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">Inactive</span>
+                                            )}
+                                            {product.is_secret && (
+                                                <span className="text-xs px-2 py-0.5 rounded-full bg-rose-100 text-rose-700">🔒 Secret</span>
+                                            )}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <div className="flex items-center justify-end gap-1">
+                                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(product)}>
+                                                <Pencil className="w-3.5 h-3.5" />
+                                            </Button>
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-destructive" onClick={() => setDeleteProductId(product.id)}>
+                                                <Trash2 className="w-3.5 h-3.5" />
+                                            </Button>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </div>
+            )}
 
             {filteredProducts.length === 0 && (
                 <div className="text-center py-12 text-muted-foreground">

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import { motion } from "framer-motion"
 import { Plus, Trash2, Package, Check, Edit2, X, Upload, Loader2, ChevronsUpDown } from "lucide-react"
@@ -14,6 +14,7 @@ import { Command, CommandEmpty, CommandInput, CommandItem, CommandList } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { AdminPageHeader } from "@/components/admin/admin-page-header"
 import { cn } from "@/lib/utils"
+import { buildCollageBlob } from "@/lib/generate-collage"
 import { createBundle, deleteBundle, toggleBundleStatus, updateBundle } from "./actions"
 import { toast } from "sonner"
 
@@ -56,6 +57,7 @@ export function BundlesManager({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [uploadingImage, setUploadingImage] = useState(false)
   const [productPickerOpen, setProductPickerOpen] = useState(false)
+  const [collagePreview, setCollagePreview] = useState<string | null>(null)
 
   const originalPrice = selectedProducts.reduce((sum, id) => {
     const product = products.find((p) => p.id === id)
@@ -65,6 +67,41 @@ export function BundlesManager({
   const savings = originalPrice - (Number.parseFloat(bundlePrice) || 0)
   const savingsPercent = originalPrice > 0 ? Math.round((savings / originalPrice) * 100) : 0
 
+  // Live local preview of the auto-generated collage — only ever composited
+  // client-side here, never uploaded until the bundle is actually saved.
+  useEffect(() => {
+    if (bundleImage || selectedProducts.length === 0) {
+      setCollagePreview(null)
+      return
+    }
+
+    let cancelled = false
+    let objectUrl: string | null = null
+
+    const imageUrls = selectedProducts
+      .map((id) => products.find((p) => p.id === id)?.images?.[0])
+      .filter((url): url is string => Boolean(url))
+
+    if (imageUrls.length === 0) {
+      setCollagePreview(null)
+    } else {
+      buildCollageBlob(imageUrls).then((blob) => {
+        if (cancelled) return
+        if (blob) {
+          objectUrl = URL.createObjectURL(blob)
+          setCollagePreview(objectUrl)
+        } else {
+          setCollagePreview(null)
+        }
+      })
+    }
+
+    return () => {
+      cancelled = true
+      if (objectUrl) URL.revokeObjectURL(objectUrl)
+    }
+  }, [selectedProducts, bundleImage, products])
+
   const resetForm = () => {
     setBundleName("")
     setDescription("")
@@ -73,6 +110,7 @@ export function BundlesManager({
     setBundleImage("")
     setSelectedProducts([])
     setEditingBundle(null)
+    setCollagePreview(null)
   }
 
   const handleEdit = (bundle: Bundle) => {
@@ -81,6 +119,7 @@ export function BundlesManager({
     setDescription(bundle.description)
     setSelectedProducts(bundle.product_ids)
     setBundlePrice(bundle.bundle_price.toString())
+    setDiscountPercentage(bundle.savings.toString())
     setBundleImage(bundle.bundle_image || "")
     setShowForm(true)
   }
@@ -126,7 +165,28 @@ export function BundlesManager({
 
     setIsSubmitting(true)
 
-    const imageToUse = bundleImage || null
+    let imageToUse = bundleImage || null
+
+    // No manual upload, but a collage preview is showing — persist it for real.
+    if (!imageToUse && collagePreview) {
+      const imageUrls = selectedProducts
+        .map((id) => products.find((p) => p.id === id)?.images?.[0])
+        .filter((url): url is string => Boolean(url))
+      const blob = await buildCollageBlob(imageUrls)
+      if (blob) {
+        const data = new FormData()
+        data.append("file", blob, "collage.jpg")
+        try {
+          const res = await fetch("/api/upload", { method: "POST", body: data })
+          const json = await res.json()
+          if (json.success) {
+            imageToUse = json.url
+          }
+        } catch (err) {
+          console.error("Failed to upload collage image:", err)
+        }
+      }
+    }
 
     if (editingBundle) {
       // Update existing bundle
@@ -250,6 +310,30 @@ export function BundlesManager({
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
+                  </div>
+                ) : collagePreview ? (
+                  <div className="space-y-2">
+                    <div className="relative w-32 h-32 rounded-lg overflow-hidden border border-border">
+                      <Image
+                        src={collagePreview}
+                        alt="Auto-generated collage preview"
+                        fill
+                        unoptimized
+                        className="object-cover"
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">Auto-generated from selected products</p>
+                    <label className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline cursor-pointer">
+                      {uploadingImage ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3" />}
+                      Upload your own instead
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleImageUpload}
+                        disabled={uploadingImage}
+                      />
+                    </label>
                   </div>
                 ) : (
                   <label className="flex flex-col items-center justify-center w-32 h-32 rounded-lg border-2 border-dashed border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50 transition-colors cursor-pointer">
