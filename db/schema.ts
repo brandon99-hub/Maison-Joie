@@ -47,6 +47,7 @@ export const products = pgTable(
       .references(() => categories.slug, { onDelete: "restrict", onUpdate: "cascade" }),
     images: text("images").array().default([]),
     is_secret: boolean("is_secret").default(false),
+    secret_discount_percent: integer("secret_discount_percent"),
     is_active: boolean("is_active").default(true),
     stock_quantity: integer("stock_quantity").default(50),
     low_stock_threshold: integer("low_stock_threshold").default(10),

@@ -62,7 +62,7 @@ export default async function BundlesPage() {
     return (
         <div className="min-h-screen pb-20 md:pb-8">
             {/* Header */}
-            <div className="px-4 pt-4">
+            <div className="hidden md:block px-4 pt-4">
                 <div className="bg-gradient-to-br from-rose-500 via-pink-500 to-rose-600 py-10 px-4 relative overflow-hidden rounded-3xl">
                     {/* Decorative elements */}
                     <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />

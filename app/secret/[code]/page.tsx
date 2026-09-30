@@ -24,19 +24,6 @@ export default async function SecretPage({
 
   const secretCode = codes[0] as SecretCode
 
-  // Get global discount percentage from app_settings
-  const settings = await sql`
-    SELECT setting_value FROM app_settings 
-    WHERE setting_key = 'secret_discount_percent'
-    LIMIT 1
-  `
-  const globalDiscountPercent = settings.length > 0
-    ? parseInt(settings[0].setting_value)
-    : 10
-
-  // Override the discount_percent with global setting
-  secretCode.discount_percent = globalDiscountPercent
-
   // Check if expired
   const isExpired = secretCode.expires_at && new Date(secretCode.expires_at) < new Date()
 

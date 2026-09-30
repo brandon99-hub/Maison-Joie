@@ -46,7 +46,8 @@ export function ProductsManager({ products: initialProducts, categories }: { pro
         category: "",
         images: [] as string[],
         is_active: true,
-        is_secret: false
+        is_secret: false,
+        secret_discount_percent: ""
     })
 
     const resetForm = () => {
@@ -58,7 +59,8 @@ export function ProductsManager({ products: initialProducts, categories }: { pro
             category: "",
             images: [],
             is_active: true,
-            is_secret: false
+            is_secret: false,
+            secret_discount_percent: ""
         })
         setEditingProduct(null)
     }
@@ -73,7 +75,8 @@ export function ProductsManager({ products: initialProducts, categories }: { pro
             category: product.category,
             images: product.images,
             is_active: product.is_active,
-            is_secret: product.is_secret || false
+            is_secret: product.is_secret || false,
+            secret_discount_percent: product.secret_discount_percent != null ? product.secret_discount_percent.toString() : ""
         })
         setShowForm(true)
     }
@@ -139,6 +142,9 @@ export function ProductsManager({ products: initialProducts, categories }: { pro
         form.append("images", formData.images.join(",")) // Send as comma-separated string, handled in action
         if (formData.is_active) form.append("is_active", "on")
         if (formData.is_secret) form.append("is_secret", "on")
+        if (formData.is_secret && formData.secret_discount_percent) {
+            form.append("secret_discount_percent", formData.secret_discount_percent)
+        }
 
         let result
         if (editingProduct) {
@@ -293,6 +299,32 @@ export function ProductsManager({ products: initialProducts, categories }: { pro
                                     />
                                 </div>
                             </div>
+
+                            {formData.is_secret && (
+                                <div className="rounded-lg border border-amber-400/50 bg-amber-50 px-4 py-3 space-y-2">
+                                    <Label className="text-sm">Secret Page Discount %</Label>
+                                    <Input
+                                        type="number"
+                                        min="0"
+                                        max="100"
+                                        placeholder="e.g. 15"
+                                        value={formData.secret_discount_percent}
+                                        onChange={e => setFormData({ ...formData, secret_discount_percent: e.target.value })}
+                                        className="bg-white"
+                                    />
+                                    {formData.price && formData.secret_discount_percent && (
+                                        <p className="text-xs text-amber-700">
+                                            Secret page price: KES{" "}
+                                            {Math.round(
+                                                Number(formData.price) * (1 - Number(formData.secret_discount_percent) / 100)
+                                            ).toLocaleString()}
+                                        </p>
+                                    )}
+                                    <p className="text-xs text-muted-foreground">
+                                        Only applies on the secret page — the regular shop price is unaffected. Leave blank to use the default discount.
+                                    </p>
+                                </div>
+                            )}
                         </div>
 
                         <div className="space-y-4 pt-6 border-t border-border">

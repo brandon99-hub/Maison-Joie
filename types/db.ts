@@ -9,6 +9,7 @@ export type Product = {
   category: string
   images: string[]
   is_secret: boolean
+  secret_discount_percent?: number | null
   is_active: boolean
   stock_quantity?: number
   low_stock_threshold?: number

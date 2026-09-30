@@ -50,11 +50,13 @@ export const reviewSchema = z.object({
         .optional(),
 })
 
-// Admin login validation schema
-export const adminLoginSchema = z.object({
-    username: z.string().min(3, "Username must be at least 3 characters"),
-    password: z.string().min(6, "Password must be at least 6 characters"),
-})
+// Shared password strength rule for every password-creation flow
+export const passwordSchema = z
+    .string()
+    .min(8, "At least 8 characters")
+    .regex(/[a-z]/, "One lowercase letter")
+    .regex(/[A-Z]/, "One uppercase letter")
+    .regex(/[0-9]/, "One number")
 
 // Product search/filter schema
 export const productFilterSchema = z.object({
@@ -71,5 +73,4 @@ export const productFilterSchema = z.object({
 // Type exports for TypeScript
 export type OrderInput = z.infer<typeof orderSchema>
 export type ReviewInput = z.infer<typeof reviewSchema>
-export type AdminLoginInput = z.infer<typeof adminLoginSchema>
 export type ProductFilter = z.infer<typeof productFilterSchema>

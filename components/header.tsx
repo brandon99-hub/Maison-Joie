@@ -7,14 +7,12 @@ import { useCart } from "@/providers"
 import { useSession, signOut } from "next-auth/react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useEffect, useState } from "react"
-import { useCategories } from "@/hooks/use-categories"
 
 export function Header() {
-  const { totalItems } = useCart()
+  const { totalItems, totalAmount } = useCart()
   const { data: session } = useSession()
   const [isAdmin, setIsAdmin] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
-  const { categories } = useCategories()
 
   useEffect(() => {
     // Check if admin session exists
@@ -51,17 +49,11 @@ export function Header() {
           <Link href="/shop" className="text-sm font-medium hover:text-primary transition-colors tracking-wide">
             Shop
           </Link>
-          {categories.map(cat => (
-            <Link
-              key={cat.id}
-              href={`/shop?category=${cat.slug}`}
-              className="text-sm font-medium hover:text-primary transition-colors tracking-wide"
-            >
-              {cat.name}
-            </Link>
-          ))}
           <Link href="/bundles" className="text-sm font-medium hover:text-primary transition-colors tracking-wide">
             Bundles
+          </Link>
+          <Link href="/testimonials" className="text-sm font-medium hover:text-primary transition-colors tracking-wide">
+            Reviews
           </Link>
         </nav>
 
@@ -75,20 +67,27 @@ export function Header() {
           )}
 
           {/* Cart - Now before user icon */}
-          <Link href="/cart" className="relative p-2.5 hover:bg-rose-50 rounded-full transition-colors group">
-            <ShoppingBag className="h-5 w-5 text-gray-700 group-hover:text-rose-600 transition-colors" />
-            <AnimatePresence>
-              {totalItems > 0 && (
-                <motion.span
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  exit={{ scale: 0 }}
-                  className="absolute -top-0.5 -right-0.5 bg-rose-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold shadow-md ring-2 ring-white"
-                >
-                  {totalItems}
-                </motion.span>
-              )}
-            </AnimatePresence>
+          <Link href="/cart" className="relative flex items-center gap-2 p-2.5 md:px-3 hover:bg-rose-50 rounded-full transition-colors group">
+            <span className="relative shrink-0">
+              <ShoppingBag className="h-5 w-5 text-gray-700 group-hover:text-rose-600 transition-colors" />
+              <AnimatePresence>
+                {totalItems > 0 && (
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0 }}
+                    className="md:hidden absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold shadow-md ring-2 ring-white"
+                  >
+                    {totalItems}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </span>
+            {totalItems > 0 && (
+              <span className="hidden md:inline text-xs font-semibold text-gray-700 group-hover:text-rose-600 transition-colors whitespace-nowrap">
+                {totalItems} item{totalItems !== 1 ? "s" : ""} · KES {totalAmount.toLocaleString()}
+              </span>
+            )}
           </Link>
 
           {/* User Account - Now at far right with dropdown */}
@@ -97,11 +96,16 @@ export function Header() {
               <>
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="relative p-2.5 hover:bg-rose-50 rounded-full transition-colors group flex items-center gap-1"
+                  className="relative p-2.5 hover:bg-rose-50 rounded-full transition-colors group flex items-center gap-1.5"
                 >
-                  <div className="w-5 h-5 rounded-full bg-gradient-to-r from-rose-500 to-pink-500 flex items-center justify-center text-white text-[10px] font-bold">
+                  <div className="w-5 h-5 rounded-full bg-gradient-to-r from-rose-500 to-pink-500 flex items-center justify-center text-white text-[10px] font-bold shrink-0">
                     {session.user.name?.[0]?.toUpperCase() || session.user.email?.[0]?.toUpperCase() || "U"}
                   </div>
+                  {session.user.name && (
+                    <span className="hidden md:inline text-xs font-semibold text-gray-700 group-hover:text-rose-600 transition-colors whitespace-nowrap">
+                      {session.user.name.split(" ")[0]}
+                    </span>
+                  )}
                   <ChevronDown className="h-3 w-3 text-gray-700 group-hover:text-rose-600 transition-colors" />
                 </button>
 

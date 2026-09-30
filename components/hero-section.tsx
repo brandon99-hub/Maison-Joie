@@ -1,9 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import Image from "next/image"
 import { motion } from "framer-motion"
-import { ArrowRight, Sparkles } from "lucide-react"
+import { ArrowRight, Sparkles, Flame } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { RotatingCategoryButton } from "@/components/rotating-category-button"
 import { WHATSAPP_NUMBER } from "@/lib/whatsapp"
@@ -29,25 +28,13 @@ export function HeroSection() {
       </motion.div>
 
       <div className="container mx-auto px-4 sm:px-6 text-center">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          <Image
-            src="/logo2.png"
-            alt="Maison Joie"
-            width={316}
-            height={66}
-            className="mx-auto mb-4 sm:mb-6 h-14 sm:h-16 w-auto object-contain"
-            priority
-            loading="eager"
-          />
-        </motion.div>
-
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
         >
-          <span className="inline-block bg-gradient-to-r from-rose-100 to-pink-100 text-rose-600 text-xs sm:text-sm font-bold px-3 sm:px-4 py-1.5 sm:py-2 rounded-full mb-4 sm:mb-6 shadow-sm">
-            New drops every week ✨
+          <span className="inline-flex items-center gap-1.5 bg-gradient-to-r from-rose-100 to-pink-100 text-rose-600 text-xs sm:text-sm font-bold px-3 sm:px-4 py-1.5 sm:py-2 rounded-full mb-4 sm:mb-6 shadow-sm">
+            New drops every week <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </span>
         </motion.div>
 

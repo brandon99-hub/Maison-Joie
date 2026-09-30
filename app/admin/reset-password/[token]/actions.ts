@@ -2,14 +2,16 @@
 
 import { sql } from "@/lib/db"
 import bcrypt from "bcryptjs"
+import { passwordSchema } from "@/lib/validation"
 
 export async function resetPassword(token: string, newPassword: string) {
     if (!token || !newPassword) {
         return { success: false, error: "Invalid request" }
     }
 
-    if (newPassword.length < 8) {
-        return { success: false, error: "Password must be at least 8 characters" }
+    const passwordCheck = passwordSchema.safeParse(newPassword)
+    if (!passwordCheck.success) {
+        return { success: false, error: passwordCheck.error.issues[0].message }
     }
 
     try {

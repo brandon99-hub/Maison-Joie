@@ -1,16 +1,19 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { Search, CheckSquare, Square } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { Search, CheckSquare, Square, Plus, Loader2 } from "lucide-react"
 import type { SecretCode } from "@/lib/db"
 import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { QRStatistics } from "@/components/admin/qr-statistics"
 import { QRCodePDFExporter } from "@/components/admin/qr-pdf-export"
 import { QRBulkExport } from "@/components/admin/qr-bulk-export"
 import { Checkbox } from "@/components/ui/checkbox"
 import { AdminPageHeader } from "@/components/admin/admin-page-header"
-import Image from "next/image"
+import { createSecretCode } from "@/app/admin/qr-codes/actions"
+import { toast } from "sonner"
 
 interface QRCodesClientProps {
     codesWithQr: (SecretCode & {
@@ -21,10 +24,24 @@ interface QRCodesClientProps {
 }
 
 export function QRCodesClient({ codesWithQr }: QRCodesClientProps) {
+    const router = useRouter()
     const [searchTerm, setSearchTerm] = useState("")
     const [statusFilter, setStatusFilter] = useState<string>("all")
     const [exportFilter, setExportFilter] = useState<string>("all")
     const [selectedCodes, setSelectedCodes] = useState<Set<number>>(new Set())
+    const [generating, setGenerating] = useState(false)
+
+    const handleGenerate = async () => {
+        setGenerating(true)
+        const result = await createSecretCode()
+        if (result.success) {
+            toast.success(`New code generated: ${result.code}`)
+            router.refresh()
+        } else {
+            toast.error(result.error || "Failed to generate code")
+        }
+        setGenerating(false)
+    }
 
     // Calculate statistics
     const stats = useMemo(() => {
@@ -96,7 +113,22 @@ export function QRCodesClient({ codesWithQr }: QRCodesClientProps) {
         <div className="p-6 md:p-8">
             <AdminPageHeader
                 title="Secret QR Codes"
-                description="Generate, track, and export printable QR codes for order packaging."
+                description="Manually generate one-time codes for loyal customers, then track and export them."
+                actions={
+                    <Button onClick={handleGenerate} disabled={generating} className="bg-primary hover:bg-primary/90 text-primary-foreground min-h-[44px]">
+                        {generating ? (
+                            <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Generating...
+                            </>
+                        ) : (
+                            <>
+                                <Plus className="w-4 h-4 mr-2" />
+                                Generate New Code
+                            </>
+                        )}
+                    </Button>
+                }
             />
 
             {/* Statistics */}
@@ -188,7 +220,7 @@ export function QRCodesClient({ codesWithQr }: QRCodesClientProps) {
                                     <div className="flex items-start justify-between gap-4 mb-3">
                                         <div>
                                             <h3 className="font-semibold text-lg">
-                                                Order #{sc.order_reference || "N/A"}
+                                                {sc.order_reference ? `Order #${sc.order_reference}` : "Not yet redeemed"}
                                             </h3>
                                             <p className="text-sm text-muted-foreground mt-1">
                                                 Code: <span className="font-mono font-medium text-foreground">{sc.code}</span>

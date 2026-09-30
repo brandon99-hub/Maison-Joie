@@ -3,9 +3,10 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
-import { Sparkles, Loader2, X, CheckCircle } from "lucide-react"
+import { UserPlus, Loader2, X, CheckCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { PasswordInput } from "@/components/ui/password-input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { createAccountFromOrder } from "@/app/(auth)/actions"
@@ -67,7 +68,7 @@ export function AccountCreationPrompt({ referenceCode, orderEmail }: AccountCrea
 
             <CardHeader className="relative">
                 <div className="flex items-center gap-2 mb-2">
-                    <Sparkles className="w-6 h-6 text-rose-600" />
+                    <UserPlus className="w-6 h-6 text-rose-600" />
                     <CardTitle className="text-xl bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent">
                         Track Your Order & Save Time Next Visit!
                     </CardTitle>
@@ -131,9 +132,8 @@ export function AccountCreationPrompt({ referenceCode, orderEmail }: AccountCrea
 
                     <div>
                         <Label htmlFor="password" className="text-sm">Create Password</Label>
-                        <Input
+                        <PasswordInput
                             id="password"
-                            type="password"
                             placeholder="Min. 8 characters"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
@@ -141,6 +141,7 @@ export function AccountCreationPrompt({ referenceCode, orderEmail }: AccountCrea
                             minLength={8}
                             className="mt-1 h-10 bg-white"
                             disabled={loading}
+                            showStrength
                         />
                     </div>
 
@@ -156,7 +157,7 @@ export function AccountCreationPrompt({ referenceCode, orderEmail }: AccountCrea
                             </>
                         ) : (
                             <>
-                                <Sparkles className="w-4 h-4 mr-2" />
+                                <UserPlus className="w-4 h-4 mr-2" />
                                 Create Account & Track Order
                             </>
                         )}

@@ -5,6 +5,7 @@ import { ChevronDown, ChevronUp, SlidersHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Slider } from "@/components/ui/slider"
 import {
     Select,
     SelectContent,
@@ -48,13 +49,6 @@ export function ProductFiltersImproved({
 
     const handlePriceChange = (values: number[]) => {
         onFiltersChange({ ...filters, priceMin: values[0], priceMax: values[1] })
-    }
-
-    const handleCategoryToggle = (categorySlug: string) => {
-        const newCategories = filters.categories.includes(categorySlug)
-            ? filters.categories.filter((c) => c !== categorySlug)
-            : [...filters.categories, categorySlug]
-        onFiltersChange({ ...filters, categories: newCategories })
     }
 
     const handleStockToggle = () => {
@@ -170,59 +164,20 @@ export function ProductFiltersImproved({
                                 </Select>
                             </div>
 
-                            {/* 3. Price Range Presets */}
-                            <div className="space-y-2">
+                            {/* 3. Price Range Slider */}
+                            <div className="space-y-3">
                                 <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Price Range</Label>
-                                <div className="flex flex-wrap gap-1.5 pt-0.5">
-                                    <button
-                                        type="button"
-                                        onClick={() => onFiltersChange({ ...filters, priceMin: 0, priceMax: maxPrice })}
-                                        className={cn(
-                                            "px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
-                                            filters.priceMin === 0 && filters.priceMax === maxPrice
-                                                ? "bg-primary text-primary-foreground"
-                                                : "bg-muted text-muted-foreground hover:bg-muted/80"
-                                        )}
-                                    >
-                                        Any
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => onFiltersChange({ ...filters, priceMin: 0, priceMax: 500 })}
-                                        className={cn(
-                                            "px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
-                                            filters.priceMin === 0 && filters.priceMax === 500
-                                                ? "bg-primary text-primary-foreground"
-                                                : "bg-muted text-muted-foreground hover:bg-muted/80"
-                                        )}
-                                    >
-                                        &lt; 500
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => onFiltersChange({ ...filters, priceMin: 500, priceMax: 1000 })}
-                                        className={cn(
-                                            "px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
-                                            filters.priceMin === 500 && filters.priceMax === 1000
-                                                ? "bg-primary text-primary-foreground"
-                                                : "bg-muted text-muted-foreground hover:bg-muted/80"
-                                        )}
-                                    >
-                                        500 - 1K
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => onFiltersChange({ ...filters, priceMin: 1000, priceMax: maxPrice })}
-                                        className={cn(
-                                            "px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
-                                            filters.priceMin === 1000 && filters.priceMax === maxPrice
-                                                ? "bg-primary text-primary-foreground"
-                                                : "bg-muted text-muted-foreground hover:bg-muted/80"
-                                        )}
-                                    >
-                                        Over 1K
-                                    </button>
-                                </div>
+                                <p className="text-sm font-medium">
+                                    KES {filters.priceMin.toLocaleString()} – KES {filters.priceMax.toLocaleString()}
+                                </p>
+                                <Slider
+                                    value={[filters.priceMin, filters.priceMax]}
+                                    min={0}
+                                    max={maxPrice}
+                                    step={50}
+                                    onValueChange={handlePriceChange}
+                                    className="pt-1"
+                                />
                             </div>
 
                             {/* 4. Availability & Reset */}
@@ -271,40 +226,6 @@ export function ProductFiltersImproved({
                     </div>
                 )}
 
-                {/* Category Pills - Visible on Mobile */}
-                <div>
-                    <Label className="text-sm font-medium mb-3 block">Categories</Label>
-                    <div className="flex flex-wrap gap-2">
-                        <button
-                            type="button"
-                            onClick={() => onFiltersChange({ ...filters, categories: [] })}
-                            className={cn(
-                                "px-4 py-2 rounded-full text-sm font-medium transition-colors",
-                                filters.categories.length === 0
-                                    ? "bg-primary text-primary-foreground"
-                                    : "bg-muted text-muted-foreground hover:bg-muted/80"
-                            )}
-                        >
-                            All Products
-                        </button>
-                        {categories.map((category) => (
-                            <button
-                                type="button"
-                                key={category.id}
-                                onClick={() => handleCategoryToggle(category.slug)}
-                                className={cn(
-                                    "px-4 py-2 rounded-full text-sm font-medium transition-colors",
-                                    filters.categories.includes(category.slug)
-                                        ? "bg-primary text-primary-foreground"
-                                        : "bg-muted text-muted-foreground hover:bg-muted/80"
-                                )}
-                            >
-                                {category.name}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
                 {/* Mobile Advanced Filters Accordion */}
                 <div className="border border-border rounded-lg overflow-hidden">
                     <button
@@ -330,6 +251,33 @@ export function ProductFiltersImproved({
                     {/* Mobile Expanded Content */}
                     {isExpanded && (
                         <div className="p-4 space-y-6 bg-card">
+                            {/* Category */}
+                            <div className="space-y-2">
+                                <Label>Category</Label>
+                                <Select
+                                    value={filters.categories[0] || "all"}
+                                    onValueChange={(val) => {
+                                        if (val === "all") {
+                                            onFiltersChange({ ...filters, categories: [] })
+                                        } else {
+                                            onFiltersChange({ ...filters, categories: [val] })
+                                        }
+                                    }}
+                                >
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="All Categories" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">All Categories</SelectItem>
+                                        {categories.map((category) => (
+                                            <SelectItem key={category.id} value={category.slug}>
+                                                {category.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
                             {/* Sort By */}
                             <div className="space-y-2">
                                 <Label>Sort By</Label>
@@ -350,56 +298,17 @@ export function ProductFiltersImproved({
                             {/* Price Range */}
                             <div className="space-y-3">
                                 <Label>Price Range</Label>
-                                <div className="flex flex-wrap gap-2">
-                                    <button
-                                        type="button"
-                                        onClick={() => onFiltersChange({ ...filters, priceMin: 0, priceMax: maxPrice })}
-                                        className={cn(
-                                            "px-4 py-2 rounded-full text-sm font-medium transition-colors",
-                                            filters.priceMin === 0 && filters.priceMax === maxPrice
-                                                ? "bg-primary text-primary-foreground"
-                                                : "bg-muted text-muted-foreground hover:bg-muted/80"
-                                        )}
-                                    >
-                                        Any Price
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => onFiltersChange({ ...filters, priceMin: 0, priceMax: 500 })}
-                                        className={cn(
-                                            "px-4 py-2 rounded-full text-sm font-medium transition-colors",
-                                            filters.priceMin === 0 && filters.priceMax === 500
-                                                ? "bg-primary text-primary-foreground"
-                                                : "bg-muted text-muted-foreground hover:bg-muted/80"
-                                        )}
-                                    >
-                                        Under 500
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => onFiltersChange({ ...filters, priceMin: 500, priceMax: 1000 })}
-                                        className={cn(
-                                            "px-4 py-2 rounded-full text-sm font-medium transition-colors",
-                                            filters.priceMin === 500 && filters.priceMax === 1000
-                                                ? "bg-primary text-primary-foreground"
-                                                : "bg-muted text-muted-foreground hover:bg-muted/80"
-                                        )}
-                                    >
-                                        500 - 1,000
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => onFiltersChange({ ...filters, priceMin: 1000, priceMax: maxPrice })}
-                                        className={cn(
-                                            "px-4 py-2 rounded-full text-sm font-medium transition-colors",
-                                            filters.priceMin === 1000 && filters.priceMax === maxPrice
-                                                ? "bg-primary text-primary-foreground"
-                                                : "bg-muted text-muted-foreground hover:bg-muted/80"
-                                        )}
-                                    >
-                                        Over 1,000
-                                    </button>
-                                </div>
+                                <p className="text-sm font-medium">
+                                    KES {filters.priceMin.toLocaleString()} – KES {filters.priceMax.toLocaleString()}
+                                </p>
+                                <Slider
+                                    value={[filters.priceMin, filters.priceMax]}
+                                    min={0}
+                                    max={maxPrice}
+                                    step={50}
+                                    onValueChange={handlePriceChange}
+                                    className="pt-1"
+                                />
                             </div>
 
                             {/* Stock Availability */}

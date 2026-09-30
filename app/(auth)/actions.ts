@@ -6,6 +6,7 @@ import crypto from "crypto"
 import type { Customer } from "@/lib/db"
 import { migrateWishlistToAccount } from "@/lib/wishlist-migration"
 import { sendCustomerPasswordResetEmail } from "@/lib/email"
+import { passwordSchema } from "@/lib/validation"
 
 export async function loginAction(formData: FormData) {
     const email = formData.get("email") as string
@@ -54,8 +55,9 @@ export async function registerAction(formData: FormData) {
         return { success: false, error: "All fields are required" }
     }
 
-    if (password.length < 8) {
-        return { success: false, error: "Password must be at least 8 characters" }
+    const passwordCheck = passwordSchema.safeParse(password)
+    if (!passwordCheck.success) {
+        return { success: false, error: passwordCheck.error.issues[0].message }
     }
 
     // Validate Kenyan phone number format
@@ -106,8 +108,9 @@ export async function createAccountFromOrder(data: {
         return { success: false, error: "Missing required fields" }
     }
 
-    if (data.password.length < 8) {
-        return { success: false, error: "Password must be at least 8 characters" }
+    const passwordCheck = passwordSchema.safeParse(data.password)
+    if (!passwordCheck.success) {
+        return { success: false, error: passwordCheck.error.issues[0].message }
     }
 
     try {
@@ -214,8 +217,9 @@ export async function resetCustomerPassword(token: string, newPassword: string) 
         return { success: false, error: "Token and password are required" }
     }
 
-    if (newPassword.length < 8) {
-        return { success: false, error: "Password must be at least 8 characters" }
+    const passwordCheck = passwordSchema.safeParse(newPassword)
+    if (!passwordCheck.success) {
+        return { success: false, error: passwordCheck.error.issues[0].message }
     }
 
     try {

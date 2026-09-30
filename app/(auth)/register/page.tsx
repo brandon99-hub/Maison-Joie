@@ -8,6 +8,7 @@ import Image from "next/image"
 import { Loader2, Mail, Lock, User, Phone, AlertCircle, CheckCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { PasswordInput } from "@/components/ui/password-input"
 import { Label } from "@/components/ui/label"
 import { registerAction } from "../actions"
 
@@ -127,29 +128,27 @@ export default function RegisterPage() {
                         <div>
                             <Label htmlFor="password">Password</Label>
                             <div className="relative mt-2">
-                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                                <Input
+                                <Lock className="absolute left-3 top-[22px] -translate-y-1/2 w-5 h-5 text-muted-foreground z-10 pointer-events-none" />
+                                <PasswordInput
                                     id="password"
                                     name="password"
-                                    type="password"
                                     placeholder="••••••••"
                                     required
                                     minLength={8}
                                     className="pl-10 h-11"
                                     disabled={loading}
+                                    showStrength
                                 />
                             </div>
-                            <p className="text-xs text-muted-foreground mt-1">Minimum 8 characters</p>
                         </div>
 
                         <div>
                             <Label htmlFor="confirmPassword">Confirm Password</Label>
                             <div className="relative mt-2">
-                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                                <Input
+                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground z-10 pointer-events-none" />
+                                <PasswordInput
                                     id="confirmPassword"
                                     name="confirmPassword"
-                                    type="password"
                                     placeholder="••••••••"
                                     required
                                     minLength={8}

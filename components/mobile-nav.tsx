@@ -17,7 +17,7 @@ export function MobileNav() {
     { href: "/", icon: Home, label: "Home" },
     { href: "/shop", icon: Grid3X3, label: "Shop" },
     { href: "/bundles", icon: Package, label: "Bundles" },
-    { href: "/testimonials", icon: Heart, label: "Love" },
+    { href: "/testimonials", icon: Heart, label: "Reviews" },
   ]
 
   return (

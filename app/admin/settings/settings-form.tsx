@@ -4,9 +4,11 @@ import React, { useState } from "react"
 import { Loader2, Mail, Lock, Save, CheckCircle, Percent, Sparkles, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { PasswordInput } from "@/components/ui/password-input"
 import { Label } from "@/components/ui/label"
 import { AdminPageHeader } from "@/components/admin/admin-page-header"
 import { updateAdminEmail, updateAdminPassword, updateDiscountSetting } from "./actions"
+import { passwordSchema } from "@/lib/validation"
 
 interface SettingsFormProps {
     currentEmail: string
@@ -60,8 +62,9 @@ export function SettingsForm({ currentEmail, currentDiscount }: SettingsFormProp
             return
         }
 
-        if (newPassword.length < 8) {
-            setPasswordError("Password must be at least 8 characters")
+        const passwordCheck = passwordSchema.safeParse(newPassword)
+        if (!passwordCheck.success) {
+            setPasswordError(passwordCheck.error.issues[0].message)
             setLoadingPassword(false)
             return
         }
@@ -176,9 +179,8 @@ export function SettingsForm({ currentEmail, currentDiscount }: SettingsFormProp
                     <form onSubmit={handlePasswordUpdate} className="space-y-4">
                         <div>
                             <Label htmlFor="currentPassword">Current Password</Label>
-                            <Input
+                            <PasswordInput
                                 id="currentPassword"
-                                type="password"
                                 value={currentPassword}
                                 onChange={(e) => setCurrentPassword(e.target.value)}
                                 placeholder="Enter current password"
@@ -189,9 +191,8 @@ export function SettingsForm({ currentEmail, currentDiscount }: SettingsFormProp
                         </div>
                         <div>
                             <Label htmlFor="newPassword">New Password</Label>
-                            <Input
+                            <PasswordInput
                                 id="newPassword"
-                                type="password"
                                 value={newPassword}
                                 onChange={(e) => setNewPassword(e.target.value)}
                                 placeholder="Enter new password"
@@ -199,13 +200,13 @@ export function SettingsForm({ currentEmail, currentDiscount }: SettingsFormProp
                                 minLength={8}
                                 className="mt-2"
                                 disabled={loadingPassword}
+                                showStrength
                             />
                         </div>
                         <div>
                             <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                            <Input
+                            <PasswordInput
                                 id="confirmPassword"
-                                type="password"
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 placeholder="Confirm new password"
@@ -254,7 +255,7 @@ export function SettingsForm({ currentEmail, currentDiscount }: SettingsFormProp
                         <h2 className="text-lg font-semibold text-foreground">Secret Menu Discount</h2>
                     </div>
                     <p className="text-sm text-muted-foreground mb-4">
-                        Set the discount percentage for secret QR code rewards. This applies to all new secret codes generated when orders are marked as paid.
+                        Default discount used for newly generated QR codes, and as a fallback for any secret product without its own discount set in Products.
                     </p>
                     <form onSubmit={handleDiscountUpdate} className="space-y-4">
                         <div>

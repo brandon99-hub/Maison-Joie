@@ -18,11 +18,14 @@ export async function createOrder(data: OrderInput, customerId?: number) {
     const validated = orderSchema.parse(data)
     const referenceCode = generateReferenceCode()
 
-    // Check stock availability for all items before creating order
+    // Check stock availability for all items before creating order.
+    // Also track whether this order genuinely contains a secret product —
+    // used below to decide whether a secret code should actually be redeemed.
+    let hasSecretItem = false
     for (const item of validated.items) {
       const product = await sql`
-        SELECT stock_quantity, name 
-        FROM products 
+        SELECT stock_quantity, name, is_secret
+        FROM products
         WHERE id = ${item.product_id}
       `
 
@@ -37,6 +40,8 @@ export async function createOrder(data: OrderInput, customerId?: number) {
           error: `Insufficient stock for ${product[0].name}. Only ${currentStock} available.`
         }
       }
+
+      if (product[0].is_secret) hasSecretItem = true
     }
 
     // Create the order
@@ -92,10 +97,19 @@ export async function createOrder(data: OrderInput, customerId?: number) {
       `
     }
 
-    // Mark secret code as used if provided
-    if (validated.secretCode && orderId) {
+    // Mark secret code as used if provided. Only a genuinely valid, unused code
+    // (verified server-side by markAsUsed) AND an order that actually contains
+    // a secret product gets stamped onto the order — a stale code leftover
+    // from an earlier /secret/[code] visit never hijacks an unrelated,
+    // all-regular order, and never blocks checkout either way.
+    if (validated.secretCode && hasSecretItem && orderId) {
       const { markAsUsed } = await import("@/app/admin/qr-codes/actions")
-      await markAsUsed(validated.secretCode, orderId)
+      const redemption = await markAsUsed(validated.secretCode, orderId)
+      if (redemption.success) {
+        await sql`
+          UPDATE orders SET secret_code = ${validated.secretCode} WHERE id = ${orderId}
+        `
+      }
     }
 
     return { success: true, referenceCode }

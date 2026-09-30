@@ -64,8 +64,8 @@ const TestimonialsPage = ({ testimonials }: { testimonials: Testimonial[] }) => 
   return (
     <div className="py-8 px-4 pb-24">
       <div className="container mx-auto max-w-lg">
-        <h1 className="text-3xl font-bold mb-2 text-center">The Love</h1>
-        <p className="text-muted-foreground text-center mb-8">Real messages from real girlies</p>
+        <h1 className="text-3xl font-bold mb-2 text-center">What Our Customers Say</h1>
+        <p className="text-muted-foreground text-center mb-8">Real experiences, shared by our community</p>
 
         <div className="space-y-4 mb-8">
           {testimonials.map((t, i) => (

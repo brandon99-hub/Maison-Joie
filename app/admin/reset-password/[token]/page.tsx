@@ -4,11 +4,12 @@ import { useState, useEffect } from "react"
 import { useRouter, useParams } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
-import { Loader2, Eye, EyeOff, CheckCircle, AlertCircle } from "lucide-react"
+import { Loader2, CheckCircle, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { PasswordInput } from "@/components/ui/password-input"
 import { Label } from "@/components/ui/label"
 import { resetPassword, validateResetToken } from "./actions"
+import { passwordSchema } from "@/lib/validation"
 
 export default function ResetPasswordPage() {
     const router = useRouter()
@@ -20,8 +21,6 @@ export default function ResetPasswordPage() {
     const [tokenValid, setTokenValid] = useState(false)
     const [error, setError] = useState("")
     const [success, setSuccess] = useState(false)
-    const [showPassword, setShowPassword] = useState(false)
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
     useEffect(() => {
         async function checkToken() {
@@ -50,8 +49,9 @@ export default function ResetPasswordPage() {
             return
         }
 
-        if (newPassword.length < 8) {
-            setError("Password must be at least 8 characters")
+        const passwordCheck = passwordSchema.safeParse(newPassword)
+        if (!passwordCheck.success) {
+            setError(passwordCheck.error.issues[0].message)
             setLoading(false)
             return
         }
@@ -151,49 +151,32 @@ export default function ResetPasswordPage() {
                     <form onSubmit={handleSubmit} className="space-y-5">
                         <div>
                             <Label htmlFor="password" className="text-gray-700 font-medium">New Password</Label>
-                            <div className="relative mt-2">
-                                <Input
+                            <div className="mt-2">
+                                <PasswordInput
                                     id="password"
                                     name="password"
-                                    type={showPassword ? "text" : "password"}
                                     placeholder="Enter new password"
                                     required
                                     minLength={8}
-                                    className="h-11 pr-10 border-gray-200 focus:border-rose-500 focus:ring-rose-500"
+                                    className="h-11 border-gray-200 focus-visible:border-rose-500 focus-visible:ring-rose-500"
                                     disabled={loading}
+                                    showStrength
                                 />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                                    disabled={loading}
-                                >
-                                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                                </button>
                             </div>
                         </div>
 
                         <div>
                             <Label htmlFor="confirmPassword" className="text-gray-700 font-medium">Confirm Password</Label>
-                            <div className="relative mt-2">
-                                <Input
+                            <div className="mt-2">
+                                <PasswordInput
                                     id="confirmPassword"
                                     name="confirmPassword"
-                                    type={showConfirmPassword ? "text" : "password"}
                                     placeholder="Confirm new password"
                                     required
                                     minLength={8}
-                                    className="h-11 pr-10 border-gray-200 focus:border-rose-500 focus:ring-rose-500"
+                                    className="h-11 border-gray-200 focus-visible:border-rose-500 focus-visible:ring-rose-500"
                                     disabled={loading}
                                 />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                                    disabled={loading}
-                                >
-                                    {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                                </button>
                             </div>
                         </div>
 

@@ -3,6 +3,7 @@
 import { sql } from "@/lib/db"
 import bcrypt from "bcryptjs"
 import { requireAdminAuth } from "@/lib/admin-auth"
+import { passwordSchema } from "@/lib/validation"
 
 export async function updateAdminEmail(email: string) {
     const auth = await requireAdminAuth()
@@ -30,8 +31,9 @@ export async function updateAdminPassword(currentPassword: string, newPassword: 
     const auth = await requireAdminAuth()
     if (!auth.authorized) return { success: false, error: auth.error }
 
-    if (newPassword.length < 8) {
-        return { success: false, error: "Password must be at least 8 characters" }
+    const passwordCheck = passwordSchema.safeParse(newPassword)
+    if (!passwordCheck.success) {
+        return { success: false, error: passwordCheck.error.issues[0].message }
     }
 
     try {

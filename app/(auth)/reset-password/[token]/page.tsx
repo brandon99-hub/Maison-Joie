@@ -4,11 +4,12 @@ import React, { useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
-import { Loader2, Lock, AlertCircle, CheckCircle, ArrowLeft, Eye, EyeOff } from "lucide-react"
+import { Loader2, Lock, AlertCircle, CheckCircle, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { PasswordInput } from "@/components/ui/password-input"
 import { Label } from "@/components/ui/label"
 import { resetCustomerPassword } from "../../actions"
+import { passwordSchema } from "@/lib/validation"
 
 export default function ClientResetPasswordPage() {
     const params = useParams()
@@ -17,7 +18,6 @@ export default function ClientResetPasswordPage() {
 
     const [password, setPassword] = useState("")
     const [confirmPassword, setConfirmPassword] = useState("")
-    const [showPassword, setShowPassword] = useState(false)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState("")
     const [success, setSuccess] = useState(false)
@@ -33,8 +33,9 @@ export default function ClientResetPasswordPage() {
             return
         }
 
-        if (password.length < 8) {
-            setError("Password must be at least 8 characters")
+        const passwordCheck = passwordSchema.safeParse(password)
+        if (!passwordCheck.success) {
+            setError(passwordCheck.error.issues[0].message)
             setLoading(false)
             return
         }
@@ -96,36 +97,27 @@ export default function ClientResetPasswordPage() {
                             <div>
                                 <Label htmlFor="password">New Password</Label>
                                 <div className="relative mt-2">
-                                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                                    <Input
+                                    <Lock className="absolute left-3 top-[22px] -translate-y-1/2 w-5 h-5 text-muted-foreground z-10 pointer-events-none" />
+                                    <PasswordInput
                                         id="password"
-                                        type={showPassword ? "text" : "password"}
                                         placeholder="Min. 8 characters"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         required
                                         minLength={8}
-                                        className="pl-10 pr-10 h-11"
+                                        className="pl-10 h-11"
                                         disabled={loading}
+                                        showStrength
                                     />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                                        tabIndex={-1}
-                                    >
-                                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                    </button>
                                 </div>
                             </div>
 
                             <div>
                                 <Label htmlFor="confirmPassword">Confirm New Password</Label>
                                 <div className="relative mt-2">
-                                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                                    <Input
+                                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground z-10 pointer-events-none" />
+                                    <PasswordInput
                                         id="confirmPassword"
-                                        type={showPassword ? "text" : "password"}
                                         placeholder="Confirm new password"
                                         value={confirmPassword}
                                         onChange={(e) => setConfirmPassword(e.target.value)}

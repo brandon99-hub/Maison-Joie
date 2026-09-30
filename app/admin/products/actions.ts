@@ -14,6 +14,10 @@ const productSchema = z.object({
     images: z.string().transform((val) => val.split(",").filter((url) => url.trim() !== "")),
     is_active: z.coerce.boolean().default(true),
     is_secret: z.coerce.boolean().default(false),
+    secret_discount_percent: z.preprocess(
+        (val) => (val === "" || val === null || val === undefined ? undefined : val),
+        z.coerce.number().int().min(0).max(100).optional()
+    ),
 })
 
 export async function createProduct(formData: FormData) {
@@ -30,6 +34,7 @@ export async function createProduct(formData: FormData) {
             images: formData.get("images"),
             is_active: formData.get("is_active") === "on",
             is_secret: formData.get("is_secret") === "on",
+            secret_discount_percent: formData.get("secret_discount_percent"),
         }
 
         const validatedData = productSchema.parse(rawData)
@@ -42,19 +47,20 @@ export async function createProduct(formData: FormData) {
 
         await sql`
       INSERT INTO products (
-        name, slug, description, price, stock_quantity, 
-        category, images, is_active, is_secret, created_at
+        name, slug, description, price, stock_quantity,
+        category, images, is_active, is_secret, secret_discount_percent, created_at
       )
       VALUES (
-        ${validatedData.name}, 
-        ${slug}, 
-        ${validatedData.description}, 
-        ${validatedData.price}, 
-        ${validatedData.stock_quantity}, 
-        ${validatedData.category}, 
-        ${imagesArray}, 
-        ${validatedData.is_active}, 
-        ${validatedData.is_secret}, 
+        ${validatedData.name},
+        ${slug},
+        ${validatedData.description},
+        ${validatedData.price},
+        ${validatedData.stock_quantity},
+        ${validatedData.category},
+        ${imagesArray},
+        ${validatedData.is_active},
+        ${validatedData.is_secret},
+        ${validatedData.secret_discount_percent ?? null},
         NOW()
       )
     `
@@ -82,6 +88,7 @@ export async function updateProduct(formData: FormData) {
             images: formData.get("images"),
             is_active: formData.get("is_active") === "on",
             is_secret: formData.get("is_secret") === "on",
+            secret_discount_percent: formData.get("secret_discount_percent"),
         }
 
         const validatedData = productSchema.parse(rawData)
@@ -100,10 +107,11 @@ export async function updateProduct(formData: FormData) {
           description = ${validatedData.description}, 
           price = ${validatedData.price}, 
           stock_quantity = ${validatedData.stock_quantity}, 
-          category = ${validatedData.category}, 
-          images = ${imagesArray}, 
+          category = ${validatedData.category},
+          images = ${imagesArray},
           is_active = ${validatedData.is_active},
-          is_secret = ${validatedData.is_secret}
+          is_secret = ${validatedData.is_secret},
+          secret_discount_percent = ${validatedData.secret_discount_percent ?? null}
         WHERE id = ${Number(id)}
       `
 

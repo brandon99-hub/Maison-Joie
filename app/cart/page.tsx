@@ -384,12 +384,6 @@ function CartContent() {
         // 3. Clear cart and redirect
         clearCart()
 
-        // Track if this was a secret purchase for success page styling
-        const wasSecretPurchase = typeof window !== 'undefined' && localStorage.getItem('active_secret_code')
-        if (wasSecretPurchase) {
-          localStorage.setItem('was_secret_purchase', 'true')
-        }
-
         if (typeof window !== 'undefined') localStorage.removeItem('active_secret_code')
         router.push(`/success/${result.referenceCode}`)
       } else {
@@ -620,7 +614,7 @@ function CartContent() {
                 </div>
 
                 {/* Contact Information Accordion - Below Pickup Selection */}
-                <Accordion type="single" collapsible className="w-full">
+                <Accordion type="single" collapsible defaultValue="contact" className="w-full">
                   <AccordionItem value="contact" className="border-none bg-white/60 backdrop-blur-sm rounded-2xl border border-border px-4 shadow-sm">
                     <AccordionTrigger className="hover:no-underline py-3.5">
                       <div className="flex items-center gap-3 text-left">
@@ -792,7 +786,7 @@ function CartContent() {
               </div>
 
               {/* Contact Information Accordion - Below Door to Door */}
-              <Accordion type="single" collapsible className="w-full">
+              <Accordion type="single" collapsible defaultValue="contact" className="w-full">
                 <AccordionItem value="contact" className="border-none bg-white/80 rounded-[2rem] border-2 border-border border-dashed px-4 shadow-sm">
                   <AccordionTrigger className="hover:no-underline py-4">
                     <div className="flex items-center gap-3 text-left">

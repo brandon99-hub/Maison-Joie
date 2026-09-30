@@ -5,7 +5,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { Sparkles, Lock, Clock, ShoppingBag, Check, Gift, AlertTriangle, Flame } from "lucide-react"
+import { Sparkles, Lock, Clock, ShoppingBag, Check, Gift, AlertTriangle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useCart } from "@/providers"
 import type { SecretCode, Product } from "@/lib/db"
@@ -102,12 +102,17 @@ export function SecretMenuPage({
   const router = useRouter()
   const [showReveal, setShowReveal] = useState(true)
   const [revealed, setRevealed] = useState(false)
-  const { addItem } = useCart()
+  const { addItem, totalItems } = useCart()
   const [addedProducts, setAddedProducts] = useState<Set<number>>(new Set())
+
+  // Each secret product carries its own discount rate, falling back to the
+  // code's default rate (set from app_settings at generation time) if unset.
+  const getDiscountPercent = (product: Product) =>
+    product.secret_discount_percent ?? secretCode.discount_percent ?? 0
 
   // Calculate total potential savings
   const totalSavings = products.reduce((sum, product) => {
-    return sum + (product.price * secretCode.discount_percent / 100)
+    return sum + (product.price * getDiscountPercent(product) / 100)
   }, 0)
 
   // Store secret code in localStorage for checkout tracking
@@ -122,7 +127,7 @@ export function SecretMenuPage({
       product_id: product.id,
       name: product.name,
       quantity: 1,
-      price: product.price * (1 - secretCode.discount_percent / 100), // Apply discount
+      price: product.price * (1 - getDiscountPercent(product) / 100), // Apply this product's own discount
       image: product.images[0] || "/placeholder.svg?height=100&width=100",
     })
     toast.success(`${product.name} added to cart! 🎉`)
@@ -266,63 +271,56 @@ export function SecretMenuPage({
       )}
 
       <div className="min-h-screen bg-gradient-to-b from-black via-rose-950 to-black text-white">
-        {/* Enhanced Hero Section with Countdown */}
-        <div className="text-center py-6 md:py-12 px-4">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-            <div className="mb-4">
-              <span className="inline-flex items-center gap-2 bg-rose-500/20 text-rose-300 px-4 py-2 rounded-full text-sm mb-2">
-                <Sparkles className="w-4 h-4" /> Secret Menu
-              </span>
-            </div>
-            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-2">🔓 SECRET UNLOCKED</h1>
-            <p className="text-white/60 max-w-md mx-auto text-sm md:text-base mb-4">
-              You have exclusive access to secret items
-            </p>
-
-            {/* Countdown Timer in Hero */}
-            {secretCode.expires_at && (
-              <div className="mb-4 flex items-center justify-center">
-                <div className="bg-black/40 backdrop-blur border border-amber-500/30 rounded-xl px-4 py-2">
+        {/* Consolidated Top Navbar */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="sticky top-0 z-30 bg-black/90 backdrop-blur-md border-b border-white/10"
+        >
+          <div className="max-w-7xl mx-auto px-4 py-3 space-y-2">
+            {/* Row 1: Title + Timer */}
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <h1 className="text-lg md:text-xl font-bold flex items-center gap-2">
+                  <Lock className="w-4 h-4 text-amber-400 shrink-0" />
+                  Insider Access
+                </h1>
+                <p className="text-[10px] text-white/40 mt-0.5">One-time use · {secretCode.code}</p>
+              </div>
+              {secretCode.expires_at && (
+                <div className="bg-black/40 border border-amber-500/30 rounded-full px-3 py-1 shrink-0">
                   <CountdownTimer expiresAt={secretCode.expires_at} />
                 </div>
-              </div>
-            )}
-
-            <div className="flex items-center justify-center gap-4 text-xs text-white/40">
-              <span className="flex items-center gap-1">
-                <Flame className="w-3 h-3 text-amber-400" />
-                ONE-TIME USE
-              </span>
-              <span>•</span>
-              <span>Code: {secretCode.code}</span>
+              )}
             </div>
-          </motion.div>
-        </div>
 
-        {/* Enhanced Discount Banner with KES Savings */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.4 }}
-          className="mx-4 mb-6"
-        >
-          <div className="max-w-4xl mx-auto bg-gradient-to-r from-rose-500 to-amber-500 rounded-2xl p-4 md:p-6 text-center shadow-lg shadow-rose-500/20">
-            <Gift className="w-6 h-6 md:w-8 md:h-8 mx-auto mb-2" />
-            <p className="text-base md:text-lg font-bold mb-1">{secretCode.discount_percent}% OFF Secret Items</p>
-            <p className="text-xs md:text-sm text-white/90 mb-2">Save up to KES {Math.round(totalSavings).toLocaleString()} on all items</p>
-            <div className="bg-white/20 rounded-full h-2 overflow-hidden">
-              <div className="bg-white h-full w-0 animate-[fillBar_1s_ease-out_forwards]" />
+            {/* Row 2: Savings + Actions */}
+            <div className="flex items-center justify-between gap-3">
+              <span className="inline-flex items-center gap-1.5 bg-gradient-to-r from-rose-500 to-amber-500 px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap">
+                <Gift className="w-3.5 h-3.5" /> Save up to KES {Math.round(totalSavings).toLocaleString()}
+              </span>
+              <div className="flex items-center gap-3 shrink-0">
+                <Link href="/shop" className="text-white/60 text-xs md:text-sm hover:text-white transition-colors">
+                  Regular Shop
+                </Link>
+                <Link href="/cart">
+                  <Button size="sm" className="bg-rose-500 hover:bg-rose-600 h-8">
+                    <ShoppingBag className="w-3.5 h-3.5 mr-1.5" /> Cart{totalItems > 0 ? ` (${totalItems})` : ""}
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </motion.div>
 
         {/* Products with Optimized Hover */}
-        <div className="px-4 pb-32 md:pb-24">
+        <div className="px-4 pb-12">
           <div className="max-w-7xl mx-auto">
             <h2 className="text-base md:text-lg font-semibold mb-4 text-white/80">Exclusive Drops</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {products.map((product, i) => {
-                const discountedPrice = Math.round(product.price * (1 - secretCode.discount_percent / 100))
+                const discountedPrice = Math.round(product.price * (1 - getDiscountPercent(product) / 100))
                 const savings = product.price - discountedPrice
                 const isLowStock = (product.stock_quantity ?? 0) <= 5 && (product.stock_quantity ?? 0) > 0
 
@@ -410,28 +408,7 @@ export function SecretMenuPage({
             )}
           </div>
         </div>
-
-        {/* Footer */}
-        <div className="fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur border-t border-white/10 p-4">
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <Link href="/shop" className="text-white/60 text-sm hover:text-white transition-colors">
-              Regular Shop
-            </Link>
-            <Link href="/cart">
-              <Button size="sm" className="bg-rose-500 hover:bg-rose-600">
-                <ShoppingBag className="w-4 h-4 mr-2" /> View Cart
-              </Button>
-            </Link>
-          </div>
-        </div>
       </div>
-
-      <style jsx global>{`
-        @keyframes fillBar {
-          from { width: 0%; }
-          to { width: 80%; }
-        }
-      `}</style>
     </>
   )
 }
