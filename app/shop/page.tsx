@@ -2,6 +2,12 @@ import { sql, type Product } from "@/lib/db"
 import { SwipeNavigation } from "@/components/swipe-navigation"
 import { ShopClient } from "./shop-client"
 import { Suspense } from "react"
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Shop All Fragrances | MAISON JOIE",
+  description: "Browse our full collection of premium perfumes and fragrances. Elegant scents for every occasion, delivered across Kenya.",
+}
 
 export default async function ShopPage() {
   let products: Product[] = []

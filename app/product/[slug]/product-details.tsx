@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { useCart, useWishlist } from "@/providers"
 import type { Product } from "@/lib/db"
 import { toast } from "sonner"
+import { optimizeCloudinaryUrl } from "@/lib/cloudinary"
 
 export function ProductDetails({ product }: { product: Product }) {
   const [selectedImage, setSelectedImage] = useState(0)
@@ -111,7 +112,7 @@ export function ProductDetails({ product }: { product: Product }) {
               className="relative aspect-square rounded-2xl overflow-hidden bg-gradient-to-br from-muted/50 to-muted"
             >
               <Image
-                src={product.images[selectedImage] || "/placeholder.svg?height=800&width=800"}
+                src={optimizeCloudinaryUrl(product.images[selectedImage] || "/placeholder.svg?height=800&width=800")}
                 alt={product.name}
                 fill
                 className="object-contain p-8"
@@ -145,7 +146,7 @@ export function ProductDetails({ product }: { product: Product }) {
                       : "border-muted opacity-60 hover:opacity-100"
                       }`}
                   >
-                    <Image src={img || "/placeholder.svg"} alt={`View ${i + 1}`} fill className="object-cover" />
+                    <Image src={optimizeCloudinaryUrl(img || "/placeholder.svg")} alt={`${product.name} — view ${i + 1}`} fill className="object-cover" />
                   </motion.button>
                 ))}
               </div>

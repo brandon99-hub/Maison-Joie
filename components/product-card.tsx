@@ -9,6 +9,7 @@ import { WishlistButton } from "@/components/wishlist-button"
 import { useCart } from "@/providers"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
+import { optimizeCloudinaryUrl } from "@/lib/cloudinary"
 
 interface ProductWithStock extends Product {
   stock_quantity?: number
@@ -53,7 +54,7 @@ export function ProductCard({ product, priority = false }: { product: ProductWit
       <Link href={`/product/${product.slug}`} className="block">
         <div className="aspect-square rounded-2xl overflow-hidden bg-muted mb-3 relative">
           <Image
-            src={product.images[0] || "/placeholder.svg?height=400&width=400"}
+            src={optimizeCloudinaryUrl(product.images[0] || "/placeholder.svg?height=400&width=400")}
             alt={product.name}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-300"

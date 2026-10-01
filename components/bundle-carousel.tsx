@@ -8,6 +8,7 @@ import { ChevronLeft, ChevronRight, ShoppingCart, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useCart } from "@/providers"
 import { toast } from "sonner"
+import { optimizeCloudinaryUrl } from "@/lib/cloudinary"
 
 interface BundleCarouselProps {
     bundles: Array<{
@@ -117,7 +118,7 @@ export function BundleCarousel({ bundles }: BundleCarouselProps) {
                     >
                         {bundleImage ? (
                             <Image
-                                src={bundleImage}
+                                src={optimizeCloudinaryUrl(bundleImage)}
                                 alt={currentBundle.name}
                                 fill
                                 className="object-cover"

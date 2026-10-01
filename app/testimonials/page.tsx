@@ -1,5 +1,11 @@
 import { sql, type Testimonial } from "@/lib/db"
 import TestimonialsPage from "./testimonials-page"
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Customer Reviews | MAISON JOIE",
+  description: "Real experiences from Maison Joie customers — see what people are saying about our perfumes and fragrances.",
+}
 
 export default async function Testimonials() {
   // Show all approved testimonials (both customer and non-customer)

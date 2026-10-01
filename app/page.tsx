@@ -1,6 +1,7 @@
 import { sql, type Product, type Testimonial } from "@/lib/db"
 import { HomeClient } from "./home-client"
 import { BundlesSection } from "@/components/bundles-section"
+import { generateOrganizationSchema } from "@/lib/seo-schema"
 
 export default async function HomePage() {
   let products: Product[] = []
@@ -50,12 +51,20 @@ export default async function HomePage() {
     console.log("Database connection failed or empty")
   }
 
+  const organizationJsonLd = generateOrganizationSchema()
+
   return (
-    <HomeClient
-      products={products}
-      testimonials={testimonials}
-      bundles={bundles}
-      bundlesSection={<BundlesSection />}
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+      />
+      <HomeClient
+        products={products}
+        testimonials={testimonials}
+        bundles={bundles}
+        bundlesSection={<BundlesSection />}
+      />
+    </>
   )
 }

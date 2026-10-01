@@ -25,6 +25,7 @@ const dancing = Dancing_Script({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://maison-joie.vercel.app'),
   title: "MAISON JOIE | Perfume with Elegance",
   description:
     "Premium perfumes and fragrances with elegance. Based in Kenya 🇰🇪",
@@ -42,11 +43,13 @@ export const metadata: Metadata = {
     siteName: 'Maison Joie',
     locale: 'en_KE',
     type: 'website',
+    images: [{ url: '/logo2.png' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'MAISON JOIE | Perfume with Elegance',
     description: 'Premium perfumes and fragrances with elegance',
+    images: ['/logo2.png'],
   },
   robots: {
     index: true,

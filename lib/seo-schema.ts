@@ -1,6 +1,6 @@
 import type { Product } from "@/lib/db"
 
-export function generateProductSchema(product: Product, reviews?: any[]) {
+export function generateProductSchema(product: Product) {
     const schema: Record<string, any> = {
         "@context": "https://schema.org",
         "@type": "Product",
@@ -24,15 +24,12 @@ export function generateProductSchema(product: Product, reviews?: any[]) {
         },
     }
 
-    // Add aggregate rating if reviews exist
-    if (reviews && reviews.length > 0) {
-        const avgRating =
-            reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-
+    // Add aggregate rating using the product's own precomputed review stats
+    if (product.review_count && product.review_count > 0) {
         schema["aggregateRating"] = {
             "@type": "AggregateRating",
-            ratingValue: avgRating.toFixed(1),
-            reviewCount: reviews.length,
+            ratingValue: Number(product.average_rating ?? 0).toFixed(1),
+            reviewCount: product.review_count,
             bestRating: 5,
             worstRating: 1,
         }

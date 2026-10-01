@@ -1,8 +1,14 @@
 import { sql } from "@/lib/db"
 import { BundleCard } from "@/components/bundle-card"
 import { CustomBundleBuilder } from "@/components/custom-bundle-builder"
+import type { Metadata } from "next"
 
 export const dynamic = "force-dynamic"
+
+export const metadata: Metadata = {
+    title: "Perfume Bundles & Deals | MAISON JOIE",
+    description: "Save more when you bundle! Mix and match your favorite fragrances or build your own custom perfume bundle and save up to 20%.",
+}
 
 interface Bundle {
     id: number

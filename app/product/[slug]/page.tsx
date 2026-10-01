@@ -2,6 +2,7 @@ import { notFound } from "next/navigation"
 import { sql, type Product } from "@/lib/db"
 import { ProductDetails } from "./product-details"
 import type { Metadata } from "next"
+import { generateProductSchema, generateBreadcrumbSchema } from "@/lib/seo-schema"
 
 export async function generateMetadata({
   params,
@@ -53,33 +54,23 @@ export default async function ProductPage({
   }
 
   // Structured Data (JSON-LD)
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    name: product.name,
-    image: product.images,
-    description: product.description,
-    sku: product.id.toString(),
-    brand: {
-      "@type": "Brand",
-      name: "MAISON JOIE",
-    },
-    offers: {
-      "@type": "Offer",
-      url: `${process.env.NEXT_PUBLIC_APP_URL}/product/${product.slug}`,
-      priceCurrency: "KES",
-      price: product.price,
-      availability: (product.stock_quantity || 0) > 0
-        ? "https://schema.org/InStock"
-        : "https://schema.org/OutOfStock",
-    },
-  }
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://maison-joie.vercel.app'
+  const jsonLd = generateProductSchema(product)
+  const breadcrumbJsonLd = generateBreadcrumbSchema([
+    { name: "Home", url: baseUrl },
+    { name: "Shop", url: `${baseUrl}/shop` },
+    { name: product.name, url: `${baseUrl}/product/${product.slug}` },
+  ])
 
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
       <ProductDetails product={product} />
     </>
